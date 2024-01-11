@@ -1,35 +1,33 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/layout/Navbar";
+import DogSearchParams from "./components/dog-adoption/DogSearchParams";
+import DogDetails from "./components/dog-adoption/DogDetails";
+import Footer from "./components/layout/Footer";
 
-function App() {
-  const [count, setCount] = useState(0);
-
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className="App bg-verylight m-0 ml-0 flex h-screen min-h-screen flex-col p-0">
+        <header>
+          <Navbar />
+        </header>
+        <main className="flex-grow">
+          <Routes>
+            {/* <Route path="/" element={<Home />} /> */}
+            <Route path="/dogsadoption" element={<DogSearchParams />} />
+            <Route path="/dogdetails/:id" element={<DogDetails />} />
+            {/* <Route path="/dogwalking" element={<VolunteerSearchParams />} />
+           <Route path="/signin" element={<SignIn />} />
+          <Route path="/register" element={<Register />} />  */}
+          </Routes>
+        </main>
+
+        <footer className="m-0 w-full pt-12">
+          <Footer />
+        </footer>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
