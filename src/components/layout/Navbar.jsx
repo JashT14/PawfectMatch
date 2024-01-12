@@ -24,7 +24,7 @@ const Navbar = () => {
         >
           <ul className="font-customFont text-lightest flex flex-col gap-8 text-[1.0rem] font-semibold md:flex-row md:items-center md:gap-[7vw] ">
             <li>
-              <NavLink to="/about">HOME</NavLink>{" "}
+              <NavLink to="/home">HOME</NavLink>{" "}
             </li>
             <li>
               <NavLink to="/dogadoption">DOGS FOR ADOPTION</NavLink>{" "}
