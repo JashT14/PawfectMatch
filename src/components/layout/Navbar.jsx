@@ -27,7 +27,7 @@ const Navbar = () => {
               <NavLink to="/home">HOME</NavLink>{" "}
             </li>
             <li>
-              <NavLink to="/dogadoption">DOGS FOR ADOPTION</NavLink>{" "}
+              <NavLink to="/dogsadoption">DOGS FOR ADOPTION</NavLink>{" "}
             </li>
             <li>
               <NavLink to="/dogwalking">DOG WALKING</NavLink>{" "}
