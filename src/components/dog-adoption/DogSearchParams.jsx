@@ -6,58 +6,7 @@ import fetchCountries from "./fetchCountries";
 import fetchStates from "./fetchStates";
 import transformToReadableString from "../../utils/transformToReadableString";
 import fetchCities from "./fetchCities";
-
-// FOR TESTING PURPOSES: Array with dummy data (available dogs for adoption):
-const DOGS = [
-  {
-    dogId: 1,
-    dogName: "Balu",
-    dogBreed: "Golden Retriever",
-    dogAge: "more than 2 years",
-    country: "Portugal",
-    state: "Madeira",
-    city: "Funchal",
-    dogDescription: "blablablablablabla",
-    dogPhotos: [
-      "http://pets-images.dev-apis.com/pets/dog25.jpg",
-      "http://pets-images.dev-apis.com/pets/dog26.jpg",
-      "http://pets-images.dev-apis.com/pets/dog27.jpg",
-      "http://pets-images.dev-apis.com/pets/dog28.jpg",
-      "http://pets-images.dev-apis.com/pets/dog29.jpg",
-    ],
-  },
-  {
-    dogId: 2,
-    dogName: "Feijão",
-    dogBreed: "Unknown",
-    dogAge: "less than 6 months",
-    country: "Portugal",
-    state: "Lisbon",
-    city: "Lisbon",
-    dogDescription: "blablablablablabla",
-    dogPhotos: [
-      "http://pets-images.dev-apis.com/pets/dog37.jpg",
-      "http://pets-images.dev-apis.com/pets/dog38.jpg",
-      "http://pets-images.dev-apis.com/pets/dog39.jpg",
-    ],
-  },
-  {
-    dogId: 3,
-    dogName: "Luna",
-    dogBreed: "Unknown",
-    dogAge: "more than 2 years",
-    country: "Portugal",
-    state: "Lisbon",
-    city: "Lisbon",
-    dogDescription: "blablablablablabla",
-    dogPhotos: [
-      // "http://pets-images.dev-apis.com/pets/dog35.jpg",
-      // "http://pets-images.dev-apis.com/pets/dog36.jpg",
-    ],
-  },
-];
-
-//dogAge (options: up to 6 months, 6 months to 2 years, more than 2 years)
+import DOGSarray from "./DOGSarray";
 
 const DogSearchParams = () => {
   const [countries, setCountries] = useState([]);
@@ -118,32 +67,32 @@ const DogSearchParams = () => {
       selectedCity === "All" &&
       selectedBreed === "All"
     ) {
-      filteredDogs = DOGS.filter((dog) => dog.country === selectedCountry);
+      filteredDogs = DOGSarray.filter((dog) => dog.country === selectedCountry);
     } else if (selectedCity === "All" && selectedBreed === "All") {
-      filteredDogs = DOGS.filter(
+      filteredDogs = DOGSarray.filter(
         (dog) => dog.country === selectedCountry && dog.state === selectedState,
       );
     } else if (selectedBreed === "All") {
-      filteredDogs = DOGS.filter(
+      filteredDogs = DOGSarray.filter(
         (dog) =>
           dog.country === selectedCountry &&
           dog.state === selectedState &&
           dog.city === selectedCity,
       );
     } else if (selectedState === "All" && selectedCity === "All") {
-      filteredDogs = DOGS.filter(
+      filteredDogs = DOGSarray.filter(
         (dog) =>
           dog.country === selectedCountry && dog.dogBreed === selectedBreed,
       );
     } else if (selectedCity === "All") {
-      filteredDogs = DOGS.filter(
+      filteredDogs = DOGSarray.filter(
         (dog) =>
           dog.country === selectedCountry &&
           dog.state === selectedState &&
           dog.dogBreed === selectedBreed,
       );
     } else {
-      filteredDogs = DOGS.filter(
+      filteredDogs = DOGSarray.filter(
         (dog) =>
           dog.country === selectedCountry &&
           dog.state === selectedState &&
