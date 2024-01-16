@@ -11,7 +11,7 @@ const ASSOCIATIONSarray = [
     contactEmail: "test2@gmail.com",
     description: "blablablablablabla",
     photo: ["http://pets-images.dev-apis.com/pets/dog25.jpg"],
-    type: "association",
+    userType: "association",
   },
   {
     id: 2,
@@ -24,8 +24,8 @@ const ASSOCIATIONSarray = [
     contactPhone: "+351 916477856",
     contactEmail: "test4@gmail.com",
     description: "blablablablablabla",
-    photo: ["http://pets-images.dev-apis.com/pets/dog25.jpg"],
-    type: "association",
+    photo: [],
+    userType: "association",
   },
   {
     id: 3,
@@ -39,10 +39,8 @@ const ASSOCIATIONSarray = [
     contactEmail: "test6@gmail.com",
     description: "blablablablablabla",
     photo: ["http://pets-images.dev-apis.com/pets/dog25.jpg"],
-    type: "association",
+    userType: "association",
   },
 ];
 
 export default ASSOCIATIONSarray;
-
-//dogAge (options: up to 6 months, 6 months to 2 years, more than 2 years)
