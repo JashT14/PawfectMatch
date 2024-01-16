@@ -14,13 +14,13 @@ const Navbar = () => {
     <div className="bg-darkest">
       <nav className="mx-auto flex w-[97%] items-center justify-between shadow-inner">
         <div>
-          <img className="w-[5.25rem] " src={projectLogo} alt="project-logo" />
+          <img className="w-[4.5rem] " src={projectLogo} alt="project-logo" />
         </div>
 
         <div
           className={`nav-links bg-darkest absolute left-0 ${
-            isMenuOpen ? "top-[4.8rem]" : "top-[-100%]"
-          } flex min-h-[14rem] w-full items-center px-5 md:static md:min-h-[5.25rem] md:w-auto`}
+            isMenuOpen ? "top-[5.0rem]" : "top-[-100%]"
+          } z-10 flex min-h-[14rem] w-full items-center px-5 md:static md:min-h-[5.0rem] md:w-auto`}
         >
           <ul className="font-customFont text-lightest flex flex-col gap-8 text-[1.0rem] font-semibold md:flex-row md:items-center md:gap-[7vw] ">
             <li>
