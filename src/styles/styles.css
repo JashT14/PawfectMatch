@@ -37,5 +37,5 @@
 }
 
 .card-results-dogs {
-    @apply text-lightest bg-light mt-[1.5rem] mb-[2rem] rounded-[20px] shadow-md p-[15px];
+    @apply text-lightest bg-medium mb-[2rem] rounded-[20px] shadow-md p-[15px];
 }
