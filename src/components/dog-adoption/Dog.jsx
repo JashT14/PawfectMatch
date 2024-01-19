@@ -13,14 +13,14 @@ const Dog = ({ dogPhotos, dogId, dogName, dogBreed, location }) => {
         <div className="float-left ml-[1rem] mr-[1.5rem] h-[5rem] w-[5rem] rounded-full object-cover">
           <img src={mainDogPhoto} alt={dogName} />
         </div>
-        <div className="dogs-info">
-          <h1 className="text-lightest text-[1.00rem]">
+        <div className="dogs-info font-bold">
+          <h1 className="text-[1.00rem] text-white">
             Name:&nbsp;&nbsp;&nbsp;{dogName}
           </h1>
-          <h2 className="text-lightest text-[1.00rem]">
+          <h2 className="text-[1.00rem] text-white">
             Breed:&nbsp;&nbsp;&nbsp;{dogBreed}
           </h2>
-          <h2 className="text-lightest text-[1.00rem]">
+          <h2 className="text-[1.00rem] text-white">
             Location:&nbsp;&nbsp;&nbsp;{location}
           </h2>
         </div>

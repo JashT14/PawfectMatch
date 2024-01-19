@@ -26,7 +26,7 @@ const DogDetails = () => {
     <div className="dog-details">
       <div className="dog-details-title flex items-center">
         <button
-          className="custom-button-over-lightest-bg ml-[2rem] h-[3.75rem] w-[6.5rem]"
+          className="custom-button-over-white-bg ml-[2rem] h-[3.0rem] w-[6.5rem]"
           onClick={() => navigate("/dogsadoption")}
         >
           BACK
@@ -61,29 +61,34 @@ const DogDetails = () => {
 
         <div className="flex-grow">
           <div className="container-dog-info ml-[8.125rem]">
-            <div className="text-darkest mt-10 text-[1.0rem]">
+            <div className="text-darkest mt-10 text-[1.0rem] ">
               <h2 className="mb-5">
-                NAME:&nbsp;&nbsp;&nbsp;{selectedDog.dogName}
+                <strong>NAME:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogName}
               </h2>
               <h2 className="mb-5">
-                AGE:&nbsp;&nbsp;&nbsp;{selectedDog.dogAge}
+                <strong>AGE:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogAge}
               </h2>
               <h2 className="mb-5">
-                BREED:&nbsp;&nbsp;&nbsp;{selectedDog.dogBreed}
+                <strong>BREED:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogBreed}
               </h2>
               <h2 className="mb-5">
-                LOCATION:&nbsp;&nbsp;&nbsp;
+                <strong>LOCATION:</strong>&nbsp;&nbsp;&nbsp;
                 {`${selectedDog.city}, ${selectedDog.state}, ${selectedDog.country}`}
               </h2>
               <h2 className="mb-5">
-                ASSOCIATION:&nbsp;&nbsp;&nbsp;{selectedDog.associationName}
+                <strong>ASSOCIATION:</strong>&nbsp;&nbsp;&nbsp;
+                {selectedDog.associationName}
               </h2>
-              <h2 className="mb-5">PHONE:&nbsp;&nbsp;&nbsp;{contactPhone}</h2>
-              <h2 className="mb-5">EMAIL:&nbsp;&nbsp;&nbsp;{contactEmail}</h2>
+              <h2 className="mb-5">
+                <strong>PHONE:</strong>&nbsp;&nbsp;&nbsp;{contactPhone}
+              </h2>
+              <h2 className="mb-5">
+                <strong>EMAIL:</strong>&nbsp;&nbsp;&nbsp;{contactEmail}
+              </h2>
               {/* <h2 className="mb-5">
                 LOCATION:&nbsp;&nbsp;&nbsp;{`${city}, ${state}, ${country}.`}
               </h2> */}
-              <h2 className="bg-darkest text-lightest mt-10 h-[10.94rem] w-[35rem] rounded-lg p-2 text-justify">
+              <h2 className="bg-darkest mt-10 h-[10.94rem] w-[35rem] rounded-lg p-2 text-justify text-white">
                 {selectedDog.dogDescription}
               </h2>
             </div>

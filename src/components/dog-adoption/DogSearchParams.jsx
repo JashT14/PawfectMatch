@@ -118,10 +118,10 @@ const DogSearchParams = () => {
               console.log("submit");
               requestFilteredDogs();
             }}
-            className="custom-darkest-card ml-[6.0rem] h-[32rem] w-[30.0rem] "
+            className="custom-darkest-card ml-[6.0rem] h-[32rem] w-[32.50rem] "
           >
             <div className="location-info mt-[2.0rem] flex justify-start space-x-[1.0rem]">
-              <h1 className="text-lightest mb-2 p-0 text-[1.125rem] font-semibold tracking-wide">
+              <h1 className="mb-2 mt-[0.3rem] p-0 text-[1.125rem] font-semibold tracking-wide text-white">
                 LOCATION:
               </h1>
               <div>
@@ -142,12 +142,12 @@ const DogSearchParams = () => {
             </div>
 
             <div className="breed-info mt-[2rem] flex justify-start space-x-[3.12rem] pt-0">
-              <h1 className="text-lightest text-[1.125rem] font-semibold tracking-wide">
+              <h1 className="mt-[0.3rem] text-[1.125rem] font-semibold tracking-wide text-white">
                 BREED:
               </h1>
               <label htmlFor="breeds">
                 <select
-                  className="custom-select-option w-[18rem]"
+                  className="custom-select-option w-[20rem]"
                   id="breeds"
                   value={selectedBreed}
                   onChange={(e) => {
@@ -166,14 +166,14 @@ const DogSearchParams = () => {
               </label>
             </div>
             <div className="flex justify-center">
-              <button className="custom-button-darkest-card h-[3.75rem] w-[9.0rem]">
+              <button className="custom-button-darkest-card h-[3.0rem] w-[9.0rem]">
                 FIND A DOG
               </button>
             </div>
           </form>
         </div>
 
-        <div className="two-columns-right ml-[6.0rem] mr-[0rem] w-full pl-0 lg:w-1/2 lg:flex-grow">
+        <div className="two-columns-right ml-[6.0rem] mr-[0rem] mt-[2rem] w-full pl-0 lg:w-1/2 lg:flex-grow">
           <ResultsDogsAdoption filteredDogsArray={filteredDogsArray} />
         </div>
       </div>
