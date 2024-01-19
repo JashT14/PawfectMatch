@@ -12,7 +12,7 @@ async function fetchCities(selectedCountryIso2, selectedStateIso2) {
 
   const config = {
     cUrl: `https://api.countrystatecity.in/v1/countries/${selectedCountryIso2}/states/${selectedStateIso2}/cities`,
-    cKey: "N0doTktlTklBZ1FxMTROMFJ0M2NXaXVXZ0VaUVVnWHVES2g5a1R1cg==",
+    cKey: import.meta.env.VITE_COUNTRY_STATE_CITY_API_KEY,
   };
 
   const headers = new Headers(); //initialize an empty set of headers
