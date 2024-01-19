@@ -15,7 +15,7 @@ const Location = ({
     <div className="location">
       <label htmlFor="countries">
         <select
-          className="custom-select-option w-[18rem]"
+          className="custom-select-option w-[20rem]"
           id="countries"
           value={selectedCountry}
           onChange={(e) => {
@@ -26,7 +26,7 @@ const Location = ({
             setSelectedCountryIso2(countryIso2);
           }}
         >
-          <option value="" disabled selected>
+          <option value="" disabled defaultValue>
             Country
           </option>
           {countries.map((country) => (
@@ -37,7 +37,7 @@ const Location = ({
 
       <label htmlFor="states">
         <select
-          className="custom-select-option w-[18rem]"
+          className="custom-select-option w-[20rem]"
           id="states"
           value={selectedState}
           onChange={(e) => {
@@ -48,7 +48,7 @@ const Location = ({
             setSelectedStateIso2(stateIso2);
           }}
         >
-          <option value="" disabled selected>
+          <option value="" disabled defaultValue>
             State
           </option>
           <option key="allStates">All</option>
@@ -60,14 +60,14 @@ const Location = ({
 
       <label htmlFor="cities">
         <select
-          className="custom-select-option w-[18rem]"
+          className="custom-select-option w-[20rem]"
           id="cities"
           value={selectedCity}
           onChange={(e) => {
             setSelectedCity(e.target.value);
           }}
         >
-          <option value="" disabled selected>
+          <option value="" disabled defaultValue>
             City
           </option>
           <option key="allCities">All</option>
