@@ -11,6 +11,7 @@ export default {
       medium: "#90C3AF",
       darkest: "#7DA4A1",
       white: "#ffffff",
+      darkGrey: "#475569",
     },
     extend: {},
   },
@@ -22,4 +23,4 @@ export default {
 // light: "#A7D7C5",
 // medium: "#74B49B", --> requires opacity-80 (used equivalent color without transparency)
 // darkest: "#5C8D89", --> requires opacity-80 (used equivalent color without transparency)
-// white: "#ffffff",
+// white: "#ffffff", 5C8D89
