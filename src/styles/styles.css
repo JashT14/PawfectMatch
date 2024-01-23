@@ -39,13 +39,14 @@
 }
 
 .custom-select-option {
-    @apply text-darkest mb-[1.1rem] block h-[2.4rem] text-[1.0rem] rounded-[20px] border border-darkest;
+    @apply text-darkest mb-[1.1rem] block h-[2.4rem] text-[0.9rem] rounded-[20px] border border-darkest;
 }
 
 .user-data-input  {
-    @apply border-darkest h-[2.4rem] rounded-[20px] border hover:border-2 text-[1.0rem];
+    @apply border-darkest h-[2.4rem] rounded-[20px] border hover:border-2 text-[0.9rem];
 }
 
 .radio-button  {
     @apply bg-medium border-medium text-darkGrey focus:border-darkGrey focus:ring focus:ring-white focus:ring-opacity-50;
 }
+/* change font size */
