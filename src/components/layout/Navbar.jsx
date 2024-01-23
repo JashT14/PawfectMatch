@@ -3,14 +3,19 @@ import { NavLink, useNavigate } from "react-router-dom";
 import projectLogo from "../../assets/images/projectLogo.png";
 
 const Navbar = () => {
-  const isLoggedIn = false;
-  const handleLogout = () => {
-    console.log("is logged out");
-    //TO DO!!!!
-  };
-
   const [isMenuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // ================  TO DO: INFO BACKEND =================
+
+  let isLoggedIn = true; // isLoggedIn can be true or false, if the user is logged in or logged out, respectively - GET THIS INFO FROM THE BE
+  let userType = "association"; //userType can be regular, volunteer or association - GET THIS INFO FROM THE BE
+
+  const handleLogout = () => {
+    console.log("is logged out");
+    //TO DO! ----> send info to the BE to perform LogOut
+  };
+  // =======================================================
 
   return (
     <div className="bg-darkest">
@@ -21,28 +26,46 @@ const Navbar = () => {
 
         <div
           className={`nav-links bg-darkest absolute left-0 ${
-            isMenuOpen ? "top-[5.0rem]" : "top-[-100%]"
-          } z-10 flex min-h-[14rem] w-full items-center px-5 md:static md:min-h-[4.5rem] md:w-auto`}
+            isMenuOpen ? "top-[4.3rem]" : "top-[-100%]"
+          } item z-10 flex min-h-[14rem] w-full items-center px-5 md:static md:min-h-[4.5rem] md:w-auto`}
         >
-          <ul className="font-customFont flex flex-col gap-8 text-[1.0rem] font-semibold text-white md:flex-row md:items-center md:gap-[7vw] ">
-            <li>
-              <NavLink to="/home">HOME</NavLink>{" "}
-            </li>
-            <li>
-              <NavLink to="/dogsadoption">DOGS FOR ADOPTION</NavLink>{" "}
-            </li>
-            <li>
-              <NavLink to="/dogwalking">DOG WALKING</NavLink>{" "}
-            </li>
-          </ul>
+          {isLoggedIn && userType === "association" ? (
+            <div>
+              <ul className="font-customFont ml-[1rem] flex flex-col gap-6 text-center text-[1.0rem] font-semibold text-white md:flex-row md:items-center md:gap-[7vw] ">
+                <li>
+                  <NavLink to="/">HOME</NavLink>{" "}
+                </li>
+                <li>
+                  <NavLink to="/mydogs">MANAGE DOGS FOR ADOPTION</NavLink>{" "}
+                </li>
+                <li>
+                  <NavLink to="/dogwalking">VOLUNTEERS</NavLink>{" "}
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div>
+              <ul className="font-customFont ml-[1rem] flex flex-col gap-6 text-center text-[1.0rem] font-semibold text-white md:flex-row md:items-center md:gap-[7vw] ">
+                <li>
+                  <NavLink to="/">HOME</NavLink>{" "}
+                </li>
+                <li>
+                  <NavLink to="/dogsadoption">DOGS FOR ADOPTION</NavLink>{" "}
+                </li>
+                <li>
+                  <NavLink to="/dogwalking">DOG WALKING</NavLink>{" "}
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
 
-        <div className="font-customFont flex w-[18.0rem] justify-end text-[1.0rem] font-semibold text-white lg:w-auto">
+        <div className="font-customFont flex w-[15.0rem] justify-end text-[1.0rem] font-semibold text-white lg:w-auto">
           {isLoggedIn ? (
             <div className="">
               <ul className="flex items-center gap-4">
                 <li>
-                  <NavLink to="/myprofile">My profile</NavLink>
+                  <NavLink to="/profile">My profile</NavLink>
                 </li>
                 <li>
                   <button
@@ -51,7 +74,6 @@ const Navbar = () => {
                   >
                     Log Out
                   </button>
-                  {/* WHEN CLICKING LOGOUT THEN DO ....*/}
                 </li>
                 <li className="cursor-pointer text-2xl md:hidden">
                   <ion-icon
