@@ -7,6 +7,9 @@ import DogWalkingSearchParams from "./components/dog-walking/DogWalkingSearchPar
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import UserProfile from "./components/auth/UserProfile";
+import Home from "./components/dog-adoption/Home";
+import MyDogs from "./components/dog-adoption/MyDogs";
+import AddDog from "./components/dog-adoption/AddDog";
 
 const App = () => {
   return (
@@ -17,16 +20,15 @@ const App = () => {
         </header>
         <main className="flex-grow">
           <Routes>
-            {/* <Route path="/" element={<Home />} /> */}
+            <Route path="/" element={<Home />} />
             <Route path="/dogsadoption" element={<DogSearchParams />} />
             <Route path="/dogdetails/:dogId" element={<DogDetails />} />
-            <Route
-              path="/dogwalking"
-              element={<DogWalkingSearchParams userType="regular" />}
-            />
+            <Route path="/dogwalking" element={<DogWalkingSearchParams />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register userType="" />} />
             <Route path="/profile" element={<UserProfile />} />
+            <Route path="/mydogs" element={<MyDogs />} />
+            <Route path="/newdog" element={<AddDog />} />
             {/* 
            <Route path="/reset" element={<Reset>} />
            */}
