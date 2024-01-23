@@ -9,7 +9,11 @@ import dogWalking from "../../assets/images/dogWalking.jpg";
 import ASSOCIATIONSarray from "../dog-adoption/ASSOCIATIONSarray";
 import VOLUNTEERSarray from "../dog-adoption/VOLUNTEERSarray";
 
-const DogWalkingSearchParams = ({ userType }) => {
+const DogWalkingSearchParams = () => {
+  // ================  TO DO: INFO BACKEND =================
+  let userType = "association"; //CHANGE THIS! TO DO! Request info to the database: useType and id (id of the logged in user, for identifying photos).
+  // =======================================================
+
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
