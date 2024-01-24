@@ -1,20 +1,35 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import projectLogo from "../../assets/images/projectLogo.png";
+import { useContext, useEffect } from "react";
+import { UserContext } from "../context/UserContext";
+import { useAuthInfo } from "../auth/checkUserInfo";
 
 const Navbar = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ================  TO DO: INFO BACKEND =================
+  // ================  CHECK THIS CODE  =================
 
-  let isLoggedIn = true; // isLoggedIn can be true or false, if the user is logged in or logged out, respectively - GET THIS INFO FROM THE BE
-  let userType = "association"; //userType can be regular, volunteer or association - GET THIS INFO FROM THE BE
+  //let isLoggedIn = true; // isLoggedIn can be true or false, if the user is logged in or logged out, respectively - GET THIS INFO FROM THE BE
+  //let userType = "regular"; //userType can be regular, volunteer or association - GET THIS INFO FROM THE BE
+
+  const { currentUser, setCurrentUser } = useContext(UserContext);
+
+  const { isLoggedIn, userType, checkLoginState, checkUserType } =
+    useAuthInfo();
+
+  useEffect(() => {
+    checkLoginState();
+    checkUserType();
+  }, [checkLoginState, checkUserType]);
 
   const handleLogout = () => {
-    console.log("is logged out");
-    //TO DO! ----> send info to the BE to perform LogOut
+    setCurrentUser(null);
+    navigate("/login");
+    console.log("is logged out", currentUser);
   };
+
   // =======================================================
 
   return (

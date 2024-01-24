@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -7,18 +9,35 @@ const Login = () => {
   const navigate = useNavigate();
 
   // ================  TO DO: INFO BACKEND =================
-  const handleSubmit = (e) => {
+  const [error, setError] = useState("");
+  const { setCurrentUser } = useContext(UserContext);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Form submitted: email and password", email);
-    navigate("/");
-    // TO DO! ------> SEND INFO (email, password) TO THE BE and perform LogIn
-    // SEND ALERT if the email does not exists, depending on the info stored in the database
+    setError("");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/login`,
+        { email, password },
+      );
+      const user = await response.data;
+      setCurrentUser(user);
+      console.log("user", user);
+      navigate("/");
+    } catch (error) {
+      setError(error.response.data.message);
+    }
   };
   // ======================================================
 
   return (
     <div className="login-container flex flex-col items-center justify-center pt-[12.00rem]">
-      <form className="flex flex-col" onSubmit={handleSubmit}>
+      <form className="flex flex-col" onSubmit={handleLogin}>
+        {error && (
+          <p className="bg-darkGrey mb-[1rem] flex justify-center rounded-[20px] p-[0.5rem] text-white shadow-md">
+            {error}
+          </p>
+        )}
         <label htmlFor="email" className="text-darkest pb-[1rem] pt-[1rem]">
           EMAIL:
         </label>

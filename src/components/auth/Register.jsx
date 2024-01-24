@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -8,24 +9,38 @@ const Register = () => {
   const [userType, setUserType] = useState("association");
   const navigate = useNavigate();
 
-  // ================  TO DO: INFO BACKEND =================
-  const handleSubmit = (e) => {
-    const newUser = {
-      email: email,
-      password: password,
-      userType: userType,
-    }; // SEND THIS INFO TO THE BACKEND AND PROCEED WITH REGISTRATION (also, store the userType in the database)
-    // newUser is not being used anywere... you can just send the info to the BE.
-    // SEND ALERTS IF: This email already exists; Password is less than 6 characters; Registration successful! Please proceed to login.
-    console.log("newUser - sending to the login page", newUser);
+  // ================  CHECK THIS CODE =================
+  const [error, setError] = useState("");
+
+  const handleRegister = async (e) => {
     e.preventDefault();
-    navigate("/login");
+    setError("");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/register`,
+        { email, password, password2, userType },
+      );
+      const newUser = await response.data;
+      console.log(newUser);
+      if (!newUser) {
+        setError("Couldn't register user. Please try again.");
+      }
+      navigate("/login");
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
+
   // ========================================================
 
   return (
-    <div className="login-container flex flex-col items-center justify-center pt-[4rem] ">
-      <form onSubmit={handleSubmit}>
+    <div className="login-container flex flex-col items-center justify-center pt-[3rem] ">
+      <form onSubmit={handleRegister}>
+        {error && (
+          <p className="bg-darkGrey mb-[1rem] flex justify-center rounded-[20px] p-[0.5rem] text-white shadow-md">
+            {error}
+          </p>
+        )}
         <h1 className="text-darkest mb-[3rem] text-center font-bold">
           {" "}
           REGISTER AS:{" "}
@@ -102,7 +117,7 @@ const Register = () => {
           <div className="mb-[0rem] mt-[0.5rem]">
             <button
               className="custom-button-over-white-bg h-[3.0rem] w-[7.5rem]"
-              onClick={(e) => handleSubmit(e)}
+              type="submit"
             >
               REGISTER
             </button>
