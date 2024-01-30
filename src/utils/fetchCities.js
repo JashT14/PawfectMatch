@@ -27,7 +27,7 @@ async function fetchCities(selectedCountryIso2, selectedStateIso2) {
   try {
     const response = await fetch(config.cUrl, requestOptions);
     citiesList = await response.json();
-    console.log("citiesList", citiesList);
+    //console.log("citiesList", citiesList);
     return citiesList;
   } catch (error) {
     console.log("error fetching cities", error);

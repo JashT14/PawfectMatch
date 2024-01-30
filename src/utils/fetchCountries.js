@@ -16,7 +16,7 @@ async function fetchCountries() {
   try {
     const response = await fetch(config.cUrl, requestOptions);
     countriesList = await response.json();
-    console.log("countriesList", countriesList);
+    //console.log("countriesList", countriesList);
     return countriesList;
   } catch (error) {
     console.log("error fetching countries", error);

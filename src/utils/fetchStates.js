@@ -22,7 +22,7 @@ async function fetchStates(selectedCountryIso2) {
   try {
     const response = await fetch(config.cUrl, requestOptions);
     statesList = await response.json();
-    console.log("statesList", statesList);
+    //console.log("statesList", statesList);
     return statesList;
   } catch (error) {
     console.log("error fetching states", error);
