@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import fetchCountries from "../dog-adoption/fetchCountries";
-import fetchStates from "../dog-adoption/fetchStates";
-import fetchCities from "../dog-adoption/fetchCities";
+import { useLocationData } from "../../utils/locationData";
 import Location from "../dog-adoption/Location";
 import ResultsAssociations from "./ResultsAssociations";
 import ResultsVolunteers from "./ResultsVolunteers";
@@ -14,43 +12,20 @@ const DogWalkingSearchParams = () => {
   let userType = "association"; //CHANGE THIS! TO DO! Request info to the database: useType and id (id of the logged in user, for identifying photos).
   // =======================================================
 
-  const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
-  const [states, setStates] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
-  const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [filteredAssociationsArray, setFilteredAssociationsArray] = useState(
     [],
   );
   const [filteredVolunteersArray, setFilteredVolunteersArray] = useState([]);
 
-  useEffect(() => {
-    fetchCountries().then((countries) => {
-      setCountries(countries);
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchStates(selectedCountryIso2).then((states) => {
-      setStates(states);
-    });
-  }, [selectedCountryIso2]);
-
-  useEffect(() => {
-    const fetchDataCities = async () => {
-      if (selectedCountryIso2 && selectedStateIso2) {
-        const fetchedCities = await fetchCities(
-          selectedCountryIso2,
-          selectedStateIso2,
-        );
-        setCities(fetchedCities);
-      }
-    };
-    fetchDataCities();
-  }, [selectedCountryIso2, selectedStateIso2]);
+  const { countries, states, cities } = useLocationData(
+    selectedCountryIso2,
+    selectedStateIso2,
+  );
 
   // call requestFilteredAssociations function onSubmit
   useEffect(() => {

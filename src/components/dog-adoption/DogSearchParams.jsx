@@ -1,50 +1,25 @@
 import { useState, useEffect } from "react";
 import Location from "./Location";
 import ResultsDogsAdoption from "./ResultsDogsAdoption";
-import fetchBreedList from "./fetchBreedList";
-import fetchCountries from "./fetchCountries";
-import fetchStates from "./fetchStates";
+import fetchBreedList from "../../utils/fetchBreedList";
 import transformToReadableString from "../../utils/transformToReadableString";
-import fetchCities from "./fetchCities";
 import DOGSarray from "./DOGSarray";
+import { useLocationData } from "../../utils/locationData";
 
 const DogSearchParams = () => {
-  const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
-  const [states, setStates] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
-  const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState("");
   const [filteredDogsArray, setFilteredDogsArray] = useState([]); //Array that contains dogs that are compatible with user input
 
-  useEffect(() => {
-    fetchCountries().then((countries) => {
-      setCountries(countries);
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchStates(selectedCountryIso2).then((states) => {
-      setStates(states);
-    });
-  }, [selectedCountryIso2]);
-
-  useEffect(() => {
-    const fetchDataCities = async () => {
-      if (selectedCountryIso2 && selectedStateIso2) {
-        const fetchedCities = await fetchCities(
-          selectedCountryIso2,
-          selectedStateIso2,
-        );
-        setCities(fetchedCities);
-      }
-    };
-    fetchDataCities();
-  }, [selectedCountryIso2, selectedStateIso2]);
+  const { countries, states, cities } = useLocationData(
+    selectedCountryIso2,
+    selectedStateIso2,
+  );
 
   // fetch breeds (DOG-CEO-API) when the component mounts and update its state with fetched breeds:
   useEffect(() => {
