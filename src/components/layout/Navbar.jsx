@@ -3,11 +3,12 @@ import { NavLink, useNavigate } from "react-router-dom";
 import projectLogo from "../../assets/images/projectLogo.png";
 import { useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
-import { useAuthInfo } from "../auth/checkUserInfo";
+import axios from "axios";
 
 const Navbar = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // ================  CHECK THIS CODE  =================
 
@@ -15,19 +16,24 @@ const Navbar = () => {
   //let userType = "regular"; //userType can be regular, volunteer or association - GET THIS INFO FROM THE BE
 
   const { currentUser, setCurrentUser } = useContext(UserContext);
+  const token = currentUser?.mail;
+  let userType = currentUser?.userType;
 
-  const { isLoggedIn, userType, checkLoginState, checkUserType } =
-    useAuthInfo();
-
+  //checking if user is logged in:
   useEffect(() => {
-    checkLoginState();
-    checkUserType();
-  }, [checkLoginState, checkUserType]);
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, [token]);
 
+  // TO CHECK IF IT WORKS AND REMOVE INFO LOCALHOST
   const handleLogout = () => {
+    axios.get(`${import.meta.env.VITE_REACT_APP_BASE_URL}/logout`, {
+      withCredentials: true,
+    });
     setCurrentUser(null);
     navigate("/login");
-    console.log("is logged out", currentUser);
+    console.log("User is logged out", currentUser);
   };
 
   // =======================================================
