@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import axios from "axios";
 
 export const UserContext = createContext();
 
@@ -17,3 +18,5 @@ const UserProvider = ({ children }) => {
   );
 };
 export default UserProvider;
+
+// currentUser has -->  email, userId, userType
