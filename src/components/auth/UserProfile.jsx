@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Location from "../dog-adoption/Location";
-import fetchCountries from "../dog-adoption/fetchCountries";
-import fetchStates from "../dog-adoption/fetchStates";
-import fetchCities from "../dog-adoption/fetchCities";
+import { useLocationData } from "../../utils/locationData";
 import noPhoto from "../../assets/images/noPhoto.png";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
+import axios from "axios";
 
 const UserProfile = () => {
   const [associationName, setAssociationName] = useState("");
@@ -13,71 +13,181 @@ const UserProfile = () => {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [description, setDescription] = useState("");
-  const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
-  const [states, setStates] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
-  const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-
+  const [editMode, setEditMode] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useNavigate();
 
+  // Context:
+  const { currentUser } = useContext(UserContext);
+  const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
+  let userType = currentUser?.userType; //comes from the local storage
+  //let userType = "volunteer";
+  console.log(
+    "userType identified in token - CHECK if it is correct!",
+    userType,
+  );
+
+  //If user writes manually the path /profile and is logged out, will be directly forwarded to login:
   useEffect(() => {
-    fetchCountries().then((countries) => {
-      setCountries(countries);
-    });
-  }, []);
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
+  //Update currentUserInfo and component's data every time the token (= currentUser.mail) changes
   useEffect(() => {
-    fetchStates(selectedCountryIso2).then((states) => {
-      setStates(states);
-    });
-  }, [selectedCountryIso2]);
+    getUserInfo();
+  }, [token]);
 
-  useEffect(() => {
-    const fetchDataCities = async () => {
-      if (selectedCountryIso2 && selectedStateIso2) {
-        const fetchedCities = await fetchCities(
-          selectedCountryIso2,
-          selectedStateIso2,
-        );
-        setCities(fetchedCities);
-      }
-    };
-    fetchDataCities();
-  }, [selectedCountryIso2, selectedStateIso2]);
+  // Fetching location data from public API:  (to be removed from here...) -----------
+  const { countries, states, cities } = useLocationData(
+    selectedCountryIso2,
+    selectedStateIso2,
+  );
 
-  // ================  TO DO: INFO BACKEND =================
-  let userType = "association"; //CHANGE THIS! TO DO! Request info to the database: useType and id (id of the logged in user, for identifying photos).
-  let helpDogWalking = false;
-  //console.log("userType:", userType, "need help?", helpDogWalking);
+  // Get user information stored in the DB:
+  const getUserInfo = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/profile`,
+        { withCredentials: true },
+      );
+      const currentUserInfo = await response.data;
+      // Destructuring userInfo object:
+      const {
+        associationName: associationName,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+        contactEmail: contactEmail,
+        contactPhone: contactPhone,
+        country: country,
+        city: city,
+        state: state,
+        description: description,
+        checkbox: checkBox,
+        userType: userType,
+      } = currentUserInfo;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Changes made!");
-    navigate("/");
-    // TO DO! --> Send the following info to the database:
-    // If userType=association --> nameAssociation, contactEmail,contactPhone, country, city, state, description, helpDogWalking, photo?
-    // If userType = volunteer or regular --> nameFirst, nameLast, contactEmail, contactPhone, country, city, state, description, photo?, userType.
+      console.log(
+        "currentUserInfo fetched from the DB (initially)",
+        currentUserInfo,
+      );
+
+      // Updating component's data with the values obtained from the DB (info that will be shown by default in each field, in case the user has already filled that information):
+      setAssociationName(associationName);
+      setNameFirst(nameFirst);
+      setNameLast(nameLast);
+      setSelectedCountry(country);
+      setSelectedState(state);
+      setSelectedCity(city);
+      setContactEmail(contactEmail);
+      setContactPhone(contactPhone);
+      setDescription(description);
+      setIsChecked(checkBox);
+    } catch (error) {
+      console.log("Error fetching user information");
+    }
+    console.log(
+      "updated components based on the info fetched from the DB",
+      associationName,
+      nameFirst,
+      nameLast,
+      selectedCountry,
+      selectedState,
+      selectedCity,
+      contactEmail,
+      contactPhone,
+      description,
+      isChecked,
+    );
   };
-  // ========================================================
 
-  const handleCheckbox = function () {
-    console.log("checked");
-    if (userType === "association" && !isChecked) {
-      helpDogWalking = true;
-      console.log("Association needs help with dog walking", helpDogWalking);
-    } else if (userType === "volunteer" && !isChecked) {
-      userType === "regular";
-      console.log("Stopped being a volunteer", userType);
-    } else if (userType === "regular" && !isChecked) {
-      userType === "volunteer";
-      console.log("you are now a volunteer", userType);
+  // Toggle function (Edit mode):
+  const handleEditMode = () => {
+    setEditMode(!editMode);
+  };
+  useEffect(() => {
+    console.log(
+      "editMode (when EDIT button is clicked should be true, and when CANCEL button is clicked should be false)",
+      editMode,
+    );
+  }, [editMode]);
+
+  // In case the user doesn't want to save changes (ignore new added info and fetch data from the DB):
+  const handleCancelClick = () => {
+    setEditMode(false);
+    getUserInfo();
+  };
+
+  // Send new info added/edited by the user to the BE (using handleSubmit function):
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Log the data being sent to the server (taking into account recent changes)
+    console.log("Data that is going to be sent to the DB:", {
+      associationName: associationName,
+      nameFirst: nameFirst,
+      nameLast: nameLast,
+      contactEmail: contactEmail,
+      contactPhone: contactPhone,
+      country: selectedCountry,
+      city: selectedCity,
+      state: selectedState,
+      description: description,
+      checkBox: isChecked,
+      userType,
+    });
+
+    setError("");
+    setEditMode(false);
+
+    // Send the updated information to the BE:
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/profile`,
+        {
+          associationName: associationName,
+          nameFirst: nameFirst,
+          nameLast: nameLast,
+          contactEmail: contactEmail,
+          contactPhone: contactPhone,
+          country: selectedCountry,
+          city: selectedCity,
+          state: selectedState,
+          description: description,
+          checkBox: isChecked,
+          userType,
+        },
+      );
+      const user = await response.data;
+      alert("Changes made!");
+      getUserInfo();
+    } catch (error) {
+      setError(error.response.data);
+      console.log(error);
     }
   };
+  useEffect(() => {
+    // Log updated userData after it has been set
+    console.log(
+      "updated userType (taking into account the checkbox option)",
+      userType,
+    );
+  }, [userType]);
+  useEffect(() => {
+    // Log updated userData after it has been set
+    console.log(
+      "isChecked value (taking into account the checkbox option)",
+      isChecked,
+    );
+  }, [isChecked]);
 
   return (
     <div className="profile-container pt-[5rem]">
@@ -85,12 +195,6 @@ const UserProfile = () => {
         <h1 className="text-darkest mb-[4.0rem] flex justify-start pl-[3rem] text-[1.25rem] font-bold">
           USER PROFILE:
         </h1>
-        <button
-          className="bg-medium hover:bg-darkest mb-[2rem] h-[3.5rem] w-[20.0rem] rounded-[20px] text-[1.00rem] font-semibold text-white"
-          onClick={() => navigate("/newdog")}
-        >
-          ADD DOG
-        </button>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -112,6 +216,8 @@ const UserProfile = () => {
                     value={associationName}
                     onChange={(e) => setAssociationName(e.target.value)}
                     placeholder="Name"
+                    readOnly={!editMode}
+                    defaultValue={associationName}
                   />
                 </div>
               </div>
@@ -131,6 +237,8 @@ const UserProfile = () => {
                     value={nameFirst}
                     onChange={(e) => setNameFirst(e.target.value)}
                     placeholder="First Name"
+                    readOnly={!editMode}
+                    defaultValue={nameFirst}
                   />
                 </div>
 
@@ -148,6 +256,8 @@ const UserProfile = () => {
                     value={nameLast}
                     onChange={(e) => setNameLast(e.target.value)}
                     placeholder="Last Name"
+                    readOnly={!editMode}
+                    defaultValue={nameLast}
                   />
                 </div>
               </div>
@@ -167,6 +277,8 @@ const UserProfile = () => {
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
                 placeholder="Email"
+                readOnly={!editMode}
+                defaultValue={contactEmail}
               />
             </div>
 
@@ -184,6 +296,8 @@ const UserProfile = () => {
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
                 placeholder="Phone"
+                readOnly={!editMode}
+                defaultValue={contactPhone}
               />
             </div>
 
@@ -191,21 +305,29 @@ const UserProfile = () => {
               <h1 className="text-darkest mt-[0.50rem] shrink-0 p-0  pb-[0.5rem] pr-[0.8rem] text-[1.00rem] font-semibold tracking-wide">
                 LOCATION:
               </h1>
-              <div>
-                <Location
-                  countries={countries}
-                  selectedCountry={selectedCountry}
-                  setSelectedCountry={setSelectedCountry}
-                  setSelectedCountryIso2={setSelectedCountryIso2}
-                  states={states}
-                  selectedState={selectedState}
-                  setSelectedState={setSelectedState}
-                  setSelectedStateIso2={setSelectedStateIso2}
-                  cities={cities}
-                  selectedCity={selectedCity}
-                  setSelectedCity={setSelectedCity}
-                />
-              </div>
+              {editMode ? (
+                <div>
+                  <Location
+                    countries={countries}
+                    selectedCountry={selectedCountry}
+                    setSelectedCountry={setSelectedCountry}
+                    setSelectedCountryIso2={setSelectedCountryIso2}
+                    states={states}
+                    selectedState={selectedState}
+                    setSelectedState={setSelectedState}
+                    setSelectedStateIso2={setSelectedStateIso2}
+                    cities={cities}
+                    selectedCity={selectedCity}
+                    setSelectedCity={setSelectedCity}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <h2>{selectedCountry}</h2>
+                  <h2>{selectedState}</h2>
+                  <h2>{selectedCity}</h2>
+                </div>
+              )}
             </div>
 
             <div className="input-description mb-[0.0rem] flex ">
@@ -222,22 +344,15 @@ const UserProfile = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="(max. 200 characters)"
+                readOnly={!editMode}
+                defaultValue={description}
               />
             </div>
 
             <div className="ml-[0rem] mt-[2rem] flex items-center justify-start">
-              <input
-                type="checkbox"
-                id="questionCheckbox"
-                checked={isChecked}
-                onChange={() => {
-                  setIsChecked(!isChecked);
-                  handleCheckbox();
-                }}
-              />
               <label
                 htmlFor="questionCheckbox"
-                className="text-darkest ml-[1.0rem] text-[1.00rem] font-bold"
+                className="text-darkest ml-[1.0rem] pr-6 text-[1.00rem] font-bold"
               >
                 {userType === "association"
                   ? "Do you need help with dog walking?"
@@ -245,9 +360,18 @@ const UserProfile = () => {
                     ? "Do you want to become a volunteer?"
                     : "Do you want to stop being a volunteer?"}
               </label>
+              <input
+                type="checkbox"
+                id="questionCheckbox"
+                checked={isChecked}
+                onChange={() => {
+                  setIsChecked(!isChecked); //toggle between true or false
+                }}
+                disabled={!editMode}
+              />
             </div>
           </div>
-          <div className="right-column pl-[3rem] pt-[3rem] lg:col-span-1 ">
+          <div className="right-column pl-[3rem] lg:col-span-1 ">
             {userType === "association" ? (
               <div>
                 <h1 className="text-darkest mb-[1.5rem] ml-[6rem] text-[1.0rem] font-bold">
@@ -270,22 +394,43 @@ const UserProfile = () => {
               />
             </div>
             <div>
-              <button
-                className="text-darkest mouse-pointer border-darkest  mb-[2rem] ml-[9.5rem] mt-[2rem] h-[2.5rem] w-[8.0rem] rounded-[20px] border bg-white text-[0.875rem] font-bold"
-                //onClick={() => TO DO!!!
-              >
-                UPLOAD
-              </button>
+              {editMode && (
+                <button
+                  className="text-darkest mouse-pointer border-darkest  mb-[2rem] ml-[9.5rem] mt-[2rem] h-[2.5rem] w-[8.0rem] rounded-[20px] border bg-white text-[0.875rem] font-bold"
+                  //onClick={() => TO DO!!!
+                >
+                  CHANGE PHOTO
+                </button>
+              )}
             </div>
           </div>
         </div>
-        <div className="mt-[1rem] flex max-w-[66rem] justify-center">
-          <button
-            className="custom-button-over-white-bg h-[3.0rem] w-[11.0rem]"
-            type="submit"
-          >
-            SAVE CHANGES
-          </button>
+        <div className="mt-[1rem] flex max-w-[66rem] justify-center gap-4">
+          {editMode ? (
+            <div>
+              <button
+                className="custom-button-over-white-bg h-[3.0rem] w-[11.0rem]"
+                type="submit"
+              >
+                SAVE CHANGES
+              </button>
+              <button
+                className="custom-button-over-white-bg h-[3.0rem] w-[11.0rem]"
+                type="button"
+                onClick={() => handleCancelClick()}
+              >
+                CANCEL
+              </button>
+            </div>
+          ) : (
+            <button
+              className="custom-button-over-white-bg h-[3.0rem] w-[11.0rem]"
+              type="button"
+              onClick={() => handleEditMode()}
+            >
+              EDIT
+            </button>
+          )}
         </div>
       </form>
     </div>
