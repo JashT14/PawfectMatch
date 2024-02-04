@@ -8,8 +8,9 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import UserProfile from "./components/auth/UserProfile";
 import Home from "./components/dog-adoption/Home";
-import MyDogs from "./components/dog-adoption/MyDogs";
 import AddDog from "./components/dog-adoption/AddDog";
+import EditDog from "./components/dog-adoption/EditDog";
+import ManageDogs from "./components/dog-adoption/ManageDogs";
 
 const App = () => {
   return (
@@ -27,11 +28,9 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register userType="" />} />
             <Route path="/profile" element={<UserProfile />} />
-            <Route path="/mydogs" element={<MyDogs />} />
-            <Route path="/newdog" element={<AddDog />} />
-            {/* 
-           <Route path="/reset" element={<Reset>} />
-           */}
+            <Route path="/adddog" element={<AddDog />} />
+            <Route path="/editdog/:dogId" element={<EditDog />} />
+            <Route path="/managedogs" element={<ManageDogs />} />
           </Routes>
         </main>
 
