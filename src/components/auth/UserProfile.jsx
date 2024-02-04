@@ -25,12 +25,28 @@ const UserProfile = () => {
   // Context:
   const { currentUser } = useContext(UserContext);
   const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
-  let userType = currentUser?.userType; //comes from the local storage
+  let userType = currentUser?.usertype; //comes from the local storage
   //let userType = "volunteer";
+
   console.log(
     "userType identified in token - CHECK if it is correct!",
     userType,
   );
+
+  //Initializing userInfo used to collect user data from the DB:
+  const [userInfo, setUserInfo] = useState({
+    associationName: "",
+    nameFirst: "",
+    nameLast: "",
+    contactEmail: "",
+    contactPhone: "",
+    country: "",
+    city: "",
+    state: "",
+    description: "",
+    checkBox: false,
+    userType,
+  });
 
   //If user writes manually the path /profile and is logged out, will be directly forwarded to login:
   useEffect(() => {
@@ -39,10 +55,9 @@ const UserProfile = () => {
     }
   }, [token, navigate]);
 
-  //Update currentUserInfo and component's data every time the token (= currentUser.mail) changes
   useEffect(() => {
     getUserInfo();
-  }, [token]);
+  }, [token]); //update userInfo and component's data every time the token (= currentUser.mail) changes
 
   // Fetching location data from public API:  (to be removed from here...) -----------
   const { countries, states, cities } = useLocationData(
@@ -57,54 +72,37 @@ const UserProfile = () => {
         `${import.meta.env.VITE_REACT_APP_BASE_URL}/profile`,
         { withCredentials: true },
       );
-      const currentUserInfo = await response.data;
-      // Destructuring userInfo object:
-      const {
-        associationName: associationName,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-        contactEmail: contactEmail,
-        contactPhone: contactPhone,
-        country: country,
-        city: city,
-        state: state,
-        description: description,
-        checkbox: checkBox,
-        userType: userType,
-      } = currentUserInfo;
+      const fetchedUserInfo = await response.data;
+      console.log("userInfo initially fetched from the DB", fetchedUserInfo);
 
-      console.log(
-        "currentUserInfo fetched from the DB (initially)",
-        currentUserInfo,
-      );
+      setUserInfo({
+        associationName: fetchedUserInfo.associationName,
+        nameFirst: fetchedUserInfo.nameFirst,
+        nameLast: fetchedUserInfo.nameLast,
+        country: fetchedUserInfo.country,
+        city: fetchedUserInfo.city,
+        state: fetchedUserInfo.state,
+        contactEmail: fetchedUserInfo.contactEmail,
+        contactPhone: fetchedUserInfo.contactPhone,
+        description: fetchedUserInfo.description,
+        checkBox: fetchedUserInfo.checkBox,
+        userType: fetchedUserInfo.userType,
+      });
 
-      // Updating component's data with the values obtained from the DB (info that will be shown by default in each field, in case the user has already filled that information):
-      setAssociationName(associationName);
-      setNameFirst(nameFirst);
-      setNameLast(nameLast);
-      setSelectedCountry(country);
-      setSelectedState(state);
-      setSelectedCity(city);
-      setContactEmail(contactEmail);
-      setContactPhone(contactPhone);
-      setDescription(description);
-      setIsChecked(checkBox);
+      // Updating component's data with the values obtained from the DB:
+      setAssociationName(fetchedUserInfo.associationName);
+      setNameFirst(fetchedUserInfo.nameFirst);
+      setNameLast(fetchedUserInfo.nameLast);
+      setSelectedCountry(fetchedUserInfo.country);
+      setSelectedState(fetchedUserInfo.state);
+      setSelectedCity(fetchedUserInfo.city);
+      setContactEmail(fetchedUserInfo.contactEmail);
+      setContactPhone(fetchedUserInfo.contactPhone);
+      setDescription(fetchedUserInfo.description);
+      setIsChecked(fetchedUserInfo.checkBox);
     } catch (error) {
       console.log("Error fetching user information");
     }
-    console.log(
-      "updated components based on the info fetched from the DB",
-      associationName,
-      nameFirst,
-      nameLast,
-      selectedCountry,
-      selectedState,
-      selectedCity,
-      contactEmail,
-      contactPhone,
-      description,
-      isChecked,
-    );
   };
 
   // Toggle function (Edit mode):
@@ -129,8 +127,7 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Log the data being sent to the server (taking into account recent changes)
+    // Log the data being sent to the server
     console.log("Data that is going to be sent to the DB:", {
       associationName: associationName,
       nameFirst: nameFirst,
@@ -147,7 +144,6 @@ const UserProfile = () => {
 
     setError("");
     setEditMode(false);
-
     // Send the updated information to the BE:
     try {
       const response = await axios.post(
@@ -168,19 +164,12 @@ const UserProfile = () => {
       );
       const user = await response.data;
       alert("Changes made!");
-      getUserInfo();
     } catch (error) {
       setError(error.response.data);
       console.log(error);
     }
   };
-  useEffect(() => {
-    // Log updated userData after it has been set
-    console.log(
-      "updated userType (taking into account the checkbox option)",
-      userType,
-    );
-  }, [userType]);
+
   useEffect(() => {
     // Log updated userData after it has been set
     console.log(
@@ -195,6 +184,14 @@ const UserProfile = () => {
         <h1 className="text-darkest mb-[4.0rem] flex justify-start pl-[3rem] text-[1.25rem] font-bold">
           USER PROFILE:
         </h1>
+        {userType === "association" && (
+          <button
+            className="bg-medium hover:bg-darkest mb-[2rem] h-[3.5rem] w-[20.0rem] rounded-[20px] text-[1.00rem] font-semibold text-white"
+            onClick={() => navigate("/newdog")}
+          >
+            ADD DOG
+          </button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -323,9 +320,10 @@ const UserProfile = () => {
                 </div>
               ) : (
                 <div>
-                  <h2>{selectedCountry}</h2>
-                  <h2>{selectedState}</h2>
-                  <h2>{selectedCity}</h2>
+                  {/* if there is no location data in the database, it will be empty string: */}
+                  <h2>{userInfo.country ? selectedCountry : userInfo.cityy}</h2>
+                  <h2>{userInfo.state ? selectedState : userInfo.city}</h2>
+                  <h2>{userInfo.city ? selectedCity : userInfo.city}</h2>
                 </div>
               )}
             </div>
@@ -350,16 +348,6 @@ const UserProfile = () => {
             </div>
 
             <div className="ml-[0rem] mt-[2rem] flex items-center justify-start">
-              <label
-                htmlFor="questionCheckbox"
-                className="text-darkest ml-[1.0rem] pr-6 text-[1.00rem] font-bold"
-              >
-                {userType === "association"
-                  ? "Do you need help with dog walking?"
-                  : userType === "regular"
-                    ? "Do you want to become a volunteer?"
-                    : "Do you want to stop being a volunteer?"}
-              </label>
               <input
                 type="checkbox"
                 id="questionCheckbox"
@@ -367,11 +355,21 @@ const UserProfile = () => {
                 onChange={() => {
                   setIsChecked(!isChecked); //toggle between true or false
                 }}
-                disabled={!editMode}
+                readOnly={!editMode}
               />
+              <label
+                htmlFor="questionCheckbox"
+                className="text-darkest ml-[1.0rem] text-[1.00rem] font-bold"
+              >
+                {userType === "association"
+                  ? "Do you need help with dog walking?"
+                  : userType === "regular"
+                    ? "Do you want to become a volunteer?"
+                    : "Do you want to stop being a volunteer?"}
+              </label>
             </div>
           </div>
-          <div className="right-column pl-[3rem] lg:col-span-1 ">
+          <div className="right-column pl-[3rem] pt-[3rem] lg:col-span-1 ">
             {userType === "association" ? (
               <div>
                 <h1 className="text-darkest mb-[1.5rem] ml-[6rem] text-[1.0rem] font-bold">
@@ -409,7 +407,7 @@ const UserProfile = () => {
           {editMode ? (
             <div>
               <button
-                className="custom-button-over-white-bg h-[3.0rem] w-[11.0rem]"
+                className="custom-button-over-white-bg mr-8 h-[3.0rem] w-[11.0rem]"
                 type="submit"
               >
                 SAVE CHANGES
