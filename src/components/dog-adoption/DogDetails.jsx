@@ -1,58 +1,131 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import DOGSarray from "./DOGSarray";
-import ASSOCIATIONSarray from "./ASSOCIATIONSarray";
+import { useState, useEffect } from "react";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
+import axios from "axios";
+import noPhoto from "../../assets/images/noPhoto.png";
 
 const DogDetails = () => {
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedBreed, setSelectedBreed] = useState("");
+  const [dogName, setDogName] = useState("");
+  const [dogAge, setDogAge] = useState("");
+  const [dogDescription, setDogDescription] = useState("");
+  const [associationName, setAssociationName] = useState("");
+  const [dogPhotos, setDogPhotos] = useState([
+    noPhoto,
+    noPhoto,
+    noPhoto,
+    noPhoto,
+    noPhoto,
+  ]);
+  const [dogProfilePhoto, setDogProfilePhoto] = useState(dogPhotos[0]); //implement feature to select profile photo
+  const [error, setError] = useState("");
+
+  // Context:
+  const { currentUser } = useContext(UserContext);
+  let userType = currentUser?.usertype; //comes from the local storage
+  //let userType = "volunteer"; // for testing FE
   const navigate = useNavigate();
-  const { dogId } = useParams(); //the value dogId from useParams is a string (need to transform into a number)
+  const { dogId } = useParams();
+  console.log("dogId", dogId);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  //Initializing dogs info:
+  const [dogInfo, setDogInfo] = useState({
+    dogName: "",
+    dogBreed: "",
+    dogAge: "",
+    country: "",
+    state: "",
+    city: "",
+    dogDescription: "",
+    dogPhotos: [],
+    dogProfilePhoto: "",
+    associationName: "",
+  });
 
-  const selectedDog = DOGSarray.find((dog) => dog.dogId === Number(dogId));
-  console.log("selectedDog", selectedDog);
-
-  const selectedDogAssociation = ASSOCIATIONSarray.find(
-    (item) => item.associationName === selectedDog.associationName,
-  );
-
-  const { contactPhone, contactEmail, country, state, city } =
-    selectedDogAssociation;
+  // FETCH DOG'S INFO FROM THE DB BASED ON IT'S id:
+  const getDogInfo = async (dogId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`,
+      );
+      const fetchedDogInfo = await response.data;
+      console.log("dog initially fetched from the DB", fetchedDogInfo);
+      setDogInfo({
+        dogName: fetchedDogInfo.dogName,
+        dogBreed: fetchedDogInfo.dogName.dogBreed,
+        dogAge: fetchedDogInfo.dogAge,
+        country: fetchedDogInfo.country,
+        state: fetchedDogInfo.state,
+        city: fetchedDogInfo.city,
+        dogDescription: fetchedDogInfo.dogDescription,
+        dogPhotos: fetchedDogInfo.dogPhotos,
+        dogProfilePhoto: fetchedDogInfo.dogProfilePhoto,
+        associationName: fetchedDogInfo.associationName,
+      });
+      //Updating component's data with the values obtained from the DB:
+      setDogName(fetchedDogInfo.dogName);
+      setSelectedBreed(fetchedDogInfo.dogName.dogBreed);
+      setDogAge(fetchedDogInfo.dogAge);
+      setSelectedCountry(fetchedDogInfo.country);
+      setSelectedState(fetchedDogInfo.state);
+      setSelectedCity(fetchedDogInfo.city);
+      setDogDescription(fetchedDogInfo.dogDescription);
+      setDogPhotos(fetchedDogInfo.dogPhotos);
+      setDogProfilePhoto(fetchedDogInfo.dogProfilePhoto);
+      setAssociationName(fetchedDogInfo.associationName);
+    } catch (error) {
+      console.log("Error fetching dog information");
+    }
+  };
 
   const handlePhotoClick = (index) => {
     setSelectedPhotoIndex(index);
   };
+  const handleBackNavigation = () => {
+    if (userType === "association") {
+      navigate("/managedogs");
+    } else {
+      navigate("/dogsadoption");
+    }
+  };
+
+  useEffect(() => {
+    getDogInfo();
+  }, []);
 
   return (
     <div className="dog-details">
       <div className="dog-details-title flex items-center">
         <button
           className="custom-button-over-white-bg ml-[2rem] h-[3.0rem] w-[6.5rem]"
-          onClick={() => navigate("/dogsadoption")}
+          onClick={handleBackNavigation}
         >
           BACK
         </button>
-
-        {/* When going back, previous results are not shown --> make necessary changes (query parameters) */}
 
         <h1 className="text-darkest font-customFont flex w-2/3 flex-grow justify-center p-[2.38rem] text-[1.25rem] font-semibold">
           DOG DETAILS
         </h1>
       </div>
 
-      <div className="container-dog-images mt-[1rem] flex flex-wrap items-start gap-[0rem]">
-        <div className="ml-[8.125rem] flex-shrink-0 ">
+      <div className="container-dog mt-[1rem] flex flex-wrap items-start gap-[0rem]">
+        <div className="container-dog-images ml-[8.125rem] flex-shrink-0 ">
           <img
             className="h-[29.38rem] w-[29.38rem] object-cover"
-            src={selectedDog.dogPhotos[selectedPhotoIndex]}
-            alt={selectedDog.dogName}
+            src={dogPhotos[selectedPhotoIndex]}
+            alt={dogName}
           />
           <div className="mt-[1rem] flex cursor-pointer flex-wrap gap-4 space-x-[0.1rem]">
-            {selectedDog.dogPhotos.map((photo, index) => (
+            {dogPhotos.map((photo, index) => (
               <img
                 key={index}
                 className="h-[5rem] w-[5rem] object-cover"
                 src={photo}
-                alt={`${selectedDog.dogName}-${index + 1}`}
+                alt={`${dogName}-${index + 1}`}
                 onClick={() => handlePhotoClick(index)}
               />
             ))}
@@ -63,33 +136,30 @@ const DogDetails = () => {
           <div className="container-dog-info ml-[8.125rem]">
             <div className="text-darkest mt-10 text-[1.0rem] ">
               <h2 className="mb-5">
-                <strong>NAME:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogName}
+                <strong>NAME:</strong>&nbsp;&nbsp;&nbsp;{dogName}
               </h2>
               <h2 className="mb-5">
-                <strong>AGE:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogAge}
+                <strong>AGE:</strong>&nbsp;&nbsp;&nbsp;{dogAge}
               </h2>
               <h2 className="mb-5">
-                <strong>BREED:</strong>&nbsp;&nbsp;&nbsp;{selectedDog.dogBreed}
+                <strong>BREED:</strong>&nbsp;&nbsp;&nbsp;{selectedBreed}
               </h2>
               <h2 className="mb-5">
                 <strong>LOCATION:</strong>&nbsp;&nbsp;&nbsp;
-                {`${selectedDog.city}, ${selectedDog.state}, ${selectedDog.country}`}
+                {`${selectedCity}, ${selectedState}, ${selectedCountry}`}
               </h2>
               <h2 className="mb-5">
                 <strong>ASSOCIATION:</strong>&nbsp;&nbsp;&nbsp;
-                {selectedDog.associationName}
+                {associationName}
               </h2>
-              <h2 className="mb-5">
+              {/* <h2 className="mb-5">
                 <strong>PHONE:</strong>&nbsp;&nbsp;&nbsp;{contactPhone}
               </h2>
               <h2 className="mb-5">
                 <strong>EMAIL:</strong>&nbsp;&nbsp;&nbsp;{contactEmail}
-              </h2>
-              {/* <h2 className="mb-5">
-                LOCATION:&nbsp;&nbsp;&nbsp;{`${city}, ${state}, ${country}.`}
               </h2> */}
               <h2 className="bg-darkest mt-10 h-[10.94rem] w-[35rem] rounded-lg p-2 text-justify text-white">
-                {selectedDog.dogDescription}
+                {dogDescription}
               </h2>
             </div>
           </div>
