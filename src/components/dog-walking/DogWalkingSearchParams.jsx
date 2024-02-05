@@ -1,93 +1,174 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocationData } from "../../utils/locationData";
 import Location from "../dog-adoption/Location";
 import ResultsAssociations from "./ResultsAssociations";
 import ResultsVolunteers from "./ResultsVolunteers";
 import dogWalking from "../../assets/images/dogWalking.jpg";
-import ASSOCIATIONSarray from "../dog-adoption/ASSOCIATIONSarray";
-import VOLUNTEERSarray from "../dog-adoption/VOLUNTEERSarray";
+import axios from "axios";
+import { UserContext } from "../context/UserContext";
 
 const DogWalkingSearchParams = () => {
-  // ================  TO DO: INFO BACKEND =================
-  let userType = "association"; //CHANGE THIS! TO DO! Request info to the database: useType and id (id of the logged in user, for identifying photos).
-  // =======================================================
-
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+
+  //let userType = "association";
+  const { currentUser } = useContext(UserContext);
+  //const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
+  let userType = currentUser?.usertype; //comes from the local storage
+
   const [filteredAssociationsArray, setFilteredAssociationsArray] = useState(
     [],
   );
   const [filteredVolunteersArray, setFilteredVolunteersArray] = useState([]);
 
+  // Fetching location data from public API:
   const { countries, states, cities } = useLocationData(
     selectedCountryIso2,
     selectedStateIso2,
   );
 
-  // call requestFilteredAssociations function onSubmit
-  useEffect(() => {
-    requestFilteredAssociations();
-    console.log("run requestFilteredAssociations");
-  }, []); //eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    requestFilteredVolunteers();
-    console.log("run requestFilteredVolunteers");
-  }, []); //eslint-disable-line react-hooks/exhaustive-deps
-
-  // FOR TESTING PURPOSES: filter the array DOGS containing dummy data to get results:
-  function requestFilteredAssociations() {
-    let filteredAssociations;
-    if (selectedState === "All" && selectedCity === "All") {
-      filteredAssociations = ASSOCIATIONSarray.filter(
-        (association) => association.country === selectedCountry,
-      );
-    } else if (selectedCity === "All") {
-      filteredAssociations = ASSOCIATIONSarray.filter(
-        (association) =>
-          association.country === selectedCountry &&
-          association.state === selectedState,
-      );
-    } else {
-      filteredAssociations = ASSOCIATIONSarray.filter(
-        (association) =>
-          association.country === selectedCountry &&
-          association.state === selectedState &&
-          association.city === selectedCity,
-      );
+  // VOLUNTEER REQUESTING FOR ASSOCIATION --- //
+  const requestFilteredAssociations = async (e) => {
+    e.preventDefault();
+    // Check if selectedCountry is missing or empty
+    if (!selectedCountry) {
+      console.error("Selected country is missing or empty");
+      return;
     }
 
-    console.log("filteredAssociations", filteredAssociations);
-    setFilteredAssociationsArray(filteredAssociations);
-  }
+    // Check if selectedState is "All" or missing
+    if (!selectedState || selectedState === "All") {
+      // Only send country data
+      try {
+        sendDataToServer(
+          `${
+            import.meta.env.VITE_REACT_APP_BASE_URL
+          }/volunteer?country=${encodeURIComponent(selectedCountry)}`,
+        );
 
-  function requestFilteredVolunteers() {
-    let filteredVolunteers;
-    if (selectedState === "All" && selectedCity === "All") {
-      filteredVolunteers = VOLUNTEERSarray.filter(
-        (volunteer) => volunteer.country === selectedCountry,
-      );
-    } else if (selectedCity === "All") {
-      filteredVolunteers = VOLUNTEERSarray.filter(
-        (volunteer) =>
-          volunteer.country === selectedCountry &&
-          volunteer.state === selectedState,
-      );
+        console.log("Country data sent successfully");
+      } catch (error) {
+        console.error("Error sending country data:", error.message);
+      }
     } else {
-      filteredVolunteers = VOLUNTEERSarray.filter(
-        (volunteer) =>
-          volunteer.country === selectedCountry &&
-          volunteer.state === selectedState &&
-          volunteer.city === selectedCity,
-      );
+      // Check if selectedCity is "All" or missing
+      if (!selectedCity || selectedCity === "All") {
+        // Send country and state data
+        try {
+          sendDataToServer(
+            `${
+              import.meta.env.VITE_REACT_APP_BASE_URL
+            }/volunteer?country=${selectedCountry}&state=${encodeURIComponent(
+              selectedState,
+            )}`,
+          );
+          console.log("Country and state data sent successfully");
+        } catch (error) {
+          console.error("Error sending country and state data:", error.message);
+        }
+      } else {
+        // Send all data
+        try {
+          await sendDataToServer(
+            `${
+              import.meta.env.VITE_REACT_APP_BASE_URL
+            }/volunteer?country=${selectedCountry}&state=${encodeURIComponent(
+              selectedState,
+            )}&city=${encodeURIComponent(selectedCity)}`,
+          );
+          console.log("All data sent successfully");
+        } catch (error) {
+          console.error("Error sending all data:", error.message);
+        }
+      }
+    }
+  };
+  const sendDataToServer = async (apiurl) => {
+    try {
+      const response = await axios.get(apiurl, {
+        withCredentials: true,
+      });
+      const locationdata = response.data;
+      console.log(locationdata);
+
+      setFilteredAssociationsArray(locationdata);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ASSOCIATIONS REQUESTING FOR VOLUNTEER --- //
+  const requestFilteredVolunteers = async (e) => {
+    e.preventDefault();
+    // Check if selectedCountry is missing or empty
+    if (!selectedCountry) {
+      console.error("Selected country is missing or empty");
+      return;
     }
 
-    console.log("filteredVolunteers", filteredVolunteers);
-    setFilteredVolunteersArray(filteredVolunteers);
-  }
+    // Check if selectedState is "All" or missing
+    if (!selectedState || selectedState === "All") {
+      // Only send country data
+      try {
+        sendDataToServer2(
+          `${
+            import.meta.env.VITE_REACT_APP_BASE_URL
+          }/association?country=${encodeURIComponent(selectedCountry)}`,
+        );
+
+        console.log("Country data sent successfully");
+      } catch (error) {
+        console.error("Error sending country data:", error.message);
+      }
+    } else {
+      // Check if selectedCity is "All" or missing
+      if (!selectedCity || selectedCity === "All") {
+        // Send country and state data
+        try {
+          sendDataToServer2(
+            `${
+              import.meta.env.VITE_REACT_APP_BASE_URL
+            }/association?country=${selectedCountry}&state=${encodeURIComponent(
+              selectedState,
+            )}`,
+          );
+          console.log("Country and state data sent successfully");
+        } catch (error) {
+          console.error("Error sending country and state data:", error.message);
+        }
+      } else {
+        // Send all data
+        try {
+          await sendDataToServer2(
+            `${
+              import.meta.env.VITE_REACT_APP_BASE_URL
+            }/association?=${selectedCountry}&state=${encodeURIComponent(
+              selectedState,
+            )}&city=${encodeURIComponent(selectedCity)}`,
+          );
+          console.log("All data sent successfully");
+        } catch (error) {
+          console.error("Error sending all data:", error.message);
+        }
+      }
+    }
+  };
+  const sendDataToServer2 = async (apiurl) => {
+    try {
+      const response = await axios.get(apiurl, {
+        withCredentials: true,
+      });
+      const locationdata = response.data;
+      console.log(locationdata);
+
+      setFilteredVolunteersArray(locationdata);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div>
@@ -99,11 +180,7 @@ const DogWalkingSearchParams = () => {
           <div className="flex flex-wrap">
             <div className="two-columns-left mt-[2rem] w-full basis-[38rem] pr-0 lg:w-[1/2]">
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  console.log("submit");
-                  requestFilteredVolunteers();
-                }}
+                onSubmit={requestFilteredAssociations}
                 className="custom-darkest-card ml-[6.0rem] h-[26.5rem] w-[32.0rem] "
               >
                 <div className="location-info mt-[2.0rem] flex justify-start space-x-[1.0rem]">
@@ -151,9 +228,6 @@ const DogWalkingSearchParams = () => {
               alt="dogWalking"
             />
           </div>
-          {/* <h1 className="text-darkest font-customFont flex justify-center p-[2.38rem] text-[1.25rem] font-semibold">
-        WALK A DOG
-      </h1> */}
 
           <h1 className="text-darkest font-customFont mb-[3rem] mt-[4rem] w-full justify-center text-center text-[1.25rem] font-semibold">
             HOW CAN I HELP?
@@ -174,11 +248,7 @@ const DogWalkingSearchParams = () => {
             <div className="flex flex-wrap">
               <div className="dog-walking-search-left-col two-columns-left mt-[3rem] basis-[38rem] justify-start pr-0 lg:w-[1/2]">
                 <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    console.log("submit");
-                    requestFilteredAssociations();
-                  }}
+                  onSubmit={requestFilteredVolunteers}
                   className="custom-darkest-card ml-[3.5rem] h-[27rem] w-[32.5rem] "
                 >
                   <div className="location-info mt-[2.0rem] flex justify-start space-x-[1.0rem]">
