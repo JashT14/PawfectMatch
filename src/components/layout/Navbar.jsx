@@ -8,25 +8,24 @@ import axios from "axios";
 const Navbar = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // ================  CHECK THIS CODE  =================
 
-  //let isLoggedIn = true; // isLoggedIn can be true or false, if the user is logged in or logged out, respectively - GET THIS INFO FROM THE BE
-  //let userType = "regular"; //userType can be regular, volunteer or association - GET THIS INFO FROM THE BE
+  //let isLoggedIn = true; // for testing FE
+  //let userType = "regular"; //testing FE
 
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const token = currentUser?.mail;
   let userType = currentUser?.userType;
 
-  //checking if user is logged in:
+  // checking if user is logged in:
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true);
     }
   }, [token]);
 
-  // TO CHECK IF IT WORKS AND REMOVE INFO LOCALHOST
   const handleLogout = () => {
     axios.get(`${import.meta.env.VITE_REACT_APP_BASE_URL}/logout`, {
       withCredentials: true,
@@ -57,7 +56,7 @@ const Navbar = () => {
                   <NavLink to="/">HOME</NavLink>{" "}
                 </li>
                 <li>
-                  <NavLink to="/mydogs">MANAGE DOGS FOR ADOPTION</NavLink>{" "}
+                  <NavLink to="/managedogs">MANAGE DOGS FOR ADOPTION</NavLink>{" "}
                 </li>
                 <li>
                   <NavLink to="/dogwalking">VOLUNTEERS</NavLink>{" "}
