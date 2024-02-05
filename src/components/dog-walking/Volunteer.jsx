@@ -1,15 +1,7 @@
 import noPhoto from "../../assets/images/noPhoto.png";
 
-const Volunteer = ({
-  photo,
-  id,
-  name,
-  location,
-  contactPhone,
-  contactEmail,
-}) => {
+const Volunteer = ({ photo, name, location, contactPhone, contactEmail }) => {
   let mainVolunteerPhoto = noPhoto;
-
   if (photo.length) {
     mainVolunteerPhoto = photo;
   }
