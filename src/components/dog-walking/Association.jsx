@@ -2,14 +2,12 @@ import noPhoto from "../../assets/images/noPhoto.png";
 
 const Association = ({
   photo,
-  id,
   associationName,
   location,
   contactPhone,
   contactEmail,
 }) => {
   let mainAssociationPhoto = noPhoto;
-
   if (photo.length) {
     mainAssociationPhoto = photo;
   }
