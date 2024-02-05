@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
-import Location from "./Location";
-import ResultsDogsAdoption from "./ResultsDogsAdoption";
+import Location from "../../components/dog-adoption/Location";
+import ResultsDogsAdoption from "../../components/dog-adoption/ResultsDogsAdoption";
 import fetchBreedList from "../../utils/fetchBreedList";
 import transformToReadableString from "../../utils/transformToReadableString";
-import DOGSarray from "./DOGSarray";
 import { useLocationData } from "../../utils/locationData";
+import axios from "axios";
 
 const DogSearchParams = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
+
   const [selectedState, setSelectedState] = useState("");
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
+
   const [selectedCity, setSelectedCity] = useState("");
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState("");
@@ -20,65 +22,111 @@ const DogSearchParams = () => {
     selectedCountryIso2,
     selectedStateIso2,
   );
-
   // fetch breeds (DOG-CEO-API) when the component mounts and update its state with fetched breeds:
   useEffect(() => {
     fetchBreedList().then((breeds) => {
       setBreeds(breeds);
     });
   }, []);
-
-  // call requestFilteredDogs function onSubmit
-  useEffect(() => {
-    requestFilteredDogs();
-    console.log("run requestFilteredDogs");
-  }, []); //eslint-disable-line react-hooks/exhaustive-deps
-
-  // FOR TESTING PURPOSES: filter the array DOGS containing dummy data to get results:
-  function requestFilteredDogs() {
-    let filteredDogs;
-    if (
-      selectedState === "All" &&
-      selectedCity === "All" &&
-      selectedBreed === "All"
-    ) {
-      filteredDogs = DOGSarray.filter((dog) => dog.country === selectedCountry);
-    } else if (selectedCity === "All" && selectedBreed === "All") {
-      filteredDogs = DOGSarray.filter(
-        (dog) => dog.country === selectedCountry && dog.state === selectedState,
-      );
-    } else if (selectedBreed === "All") {
-      filteredDogs = DOGSarray.filter(
-        (dog) =>
-          dog.country === selectedCountry &&
-          dog.state === selectedState &&
-          dog.city === selectedCity,
-      );
-    } else if (selectedState === "All" && selectedCity === "All") {
-      filteredDogs = DOGSarray.filter(
-        (dog) =>
-          dog.country === selectedCountry && dog.dogBreed === selectedBreed,
-      );
-    } else if (selectedCity === "All") {
-      filteredDogs = DOGSarray.filter(
-        (dog) =>
-          dog.country === selectedCountry &&
-          dog.state === selectedState &&
-          dog.dogBreed === selectedBreed,
-      );
-    } else {
-      filteredDogs = DOGSarray.filter(
-        (dog) =>
-          dog.country === selectedCountry &&
-          dog.state === selectedState &&
-          dog.city === selectedCity &&
-          dog.dogBreed === selectedBreed,
+  const requestFiltered = async (e) => {
+    e.preventDefault();
+    // Check if selectedCountry is missing or empty
+    if (selectedBreed === "All") {
+      // console.error("Selected country is missing or empty");
+      return sendDataToServer(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs`,
       );
     }
+    if (selectedBreed && !selectedCountry) {
+      // console.error("Selected country is missing or empty");
+      return sendDataToServer(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs/${selectedBreed}`,
+      );
+    } else {
+      // Check if selectedState is "All" or missing
+      if (!selectedState || (selectedState === "All" && selectedBreed)) {
+        // Only send country data
+        try {
+          // Send data to the server (modify the endpoint accordingly)
+          //await sendDataToServer({ country: selectedCountry });
+          sendDataToServer(
+            `${
+              import.meta.env.VITE_REACT_APP_BASE_URL
+            }/mydogs?country=${encodeURIComponent(
+              selectedCountry,
+            )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+          );
 
-    console.log("filteredDogs", filteredDogs);
-    setFilteredDogsArray(filteredDogs);
-  }
+          console.log("Country data sent successfully");
+        } catch (error) {
+          console.error("Error sending country data:", error.message);
+        }
+      } else {
+        // Check if selectedCity is "All" or missing
+        if (!selectedCity || selectedCity === "All") {
+          // Send country and state data
+          try {
+            sendDataToServer(
+              `${
+                import.meta.env.VITE_REACT_APP_BASE_URL
+              }/mydogs?country=${selectedCountry}&state=${encodeURIComponent(
+                selectedState,
+              )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+            );
+            console.log("Country and state data sent successfully");
+          } catch (error) {
+            console.error(
+              "Error sending country and state data:",
+              error.message,
+            );
+          }
+        } else {
+          // Send all data
+          try {
+            // Send data to the server (modify the endpoint accordingly)
+            await sendDataToServer(
+              `${
+                import.meta.env.VITE_REACT_APP_BASE_URL
+              }/mydogs?country=${selectedCountry}&state=${encodeURIComponent(
+                selectedState,
+              )}&city=${encodeURIComponent(
+                selectedCity,
+              )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+            );
+            console.log("All data sent successfully");
+          } catch (error) {
+            console.error("Error sending all data:", error.message);
+          }
+        }
+      }
+    }
+  };
+
+  const sendDataToServer = async (apiurl) => {
+    console.log(apiurl);
+    try {
+      const response = await axios.get(apiurl, {
+        withCredentials: true,
+      });
+      const locationdata = response.data;
+      console.log(locationdata);
+      setFilteredDogsArray(locationdata);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // const fetchAllDogs = async () => {
+  //   try {
+  //     const response = await axios.get("${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs", {
+  //       withCredentials: true,
+  //     });
+  //     const locationdata = response.data;
+  //     setFilteredDogsArray(locationdata);
+  //     console.log("All dogs data fetched successfully");
+  //   } catch (error) {
+  //     console.error("Error fetching all dogs data:", error.message);
+  //   }
+  // };
 
   return (
     <div className="">
@@ -88,11 +136,12 @@ const DogSearchParams = () => {
       <div className="flex flex-wrap">
         <div className="two-columns-left w-full basis-[38rem] pr-0 lg:w-[1/2]">
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              console.log("submit");
-              requestFilteredDogs();
-            }}
+            onSubmit={requestFiltered}
+            // onSubmit={(e) => {
+            //   e.preventDefault();
+            //   console.log("submit");
+            //   requestFilteredDogs();
+            // }}
             className="custom-darkest-card ml-[6.0rem] h-[32rem] w-[32.50rem] "
           >
             <div className="location-info mt-[2.0rem] flex justify-start space-x-[1.0rem]">

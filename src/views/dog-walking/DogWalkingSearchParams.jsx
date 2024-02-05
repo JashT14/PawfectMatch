@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from "react";
 import { useLocationData } from "../../utils/locationData";
-import Location from "../dog-adoption/Location";
-import ResultsAssociations from "./ResultsAssociations";
-import ResultsVolunteers from "./ResultsVolunteers";
+import Location from "../../components/dog-adoption/Location";
+import ResultsAssociations from "../../components/dog-walking/ResultsAssociations";
+import ResultsVolunteers from "../../components/dog-walking/ResultsVolunteers";
 import dogWalking from "../../assets/images/dogWalking.jpg";
 import axios from "axios";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../../components/context/UserContext";
 
 const DogWalkingSearchParams = () => {
   const [selectedCountry, setSelectedCountry] = useState("");

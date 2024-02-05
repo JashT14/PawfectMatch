@@ -1,14 +1,16 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import Location from "./Location";
+import Location from "../../components/dog-adoption/Location";
 import fetchBreedList from "../../utils/fetchBreedList";
 import transformToReadableString from "../../utils/transformToReadableString";
 import { useLocationData } from "../../utils/locationData";
 import noPhoto from "../../assets/images/noPhoto.png";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../../components/context/UserContext";
 
-const AddDog = () => {
+const EditDog = () => {
+  const { dogId } = useParams(); //the value dogId from useParams is a string (need to transform into a number) (dogId comes from the path indicated in App.jsx)
+  console.log("dogId", dogId);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -16,7 +18,6 @@ const AddDog = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState("");
-  const [associationName, setAssociationName] = useState("");
   const [dogName, setDogName] = useState("");
   const [dogAge, setDogAge] = useState("");
   const [dogDescription, setDogDescription] = useState("");
@@ -36,41 +37,67 @@ const AddDog = () => {
   const { currentUser } = useContext(UserContext);
   const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
   let userType = currentUser?.usertype;
+
   useEffect(() => {
-    if (userType !== "association") {
-      navigate("/home");
+    if (!token || userType !== "association") {
+      navigate("/");
     }
   }, [token, userType, navigate]);
 
+  //Get dog info - run when the component mounts:
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
+    getDogInfo(dogId);
+  }, []);
+
+  //Initializing dogs info:
+  const [dogInfo, setDogInfo] = useState({
+    dogName: "",
+    dogBreed: "",
+    dogAge: "",
+    country: "",
+    state: "",
+    city: "",
+    dogDescription: "",
+    dogPhotos: [],
+    dogProfilePhoto: "",
+    associationName: "",
+  });
+
+  //GET INFO OF THAT DOG FROM THE DB, BASED ON THE dogId:
+  const getDogInfo = async (dogId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`,
+      );
+
+      const fetchedDogInfo = await response.data;
+      console.log("dog initially fetched from the DB", fetchedDogInfo);
+      setDogInfo({
+        dogName: fetchedDogInfo.dogName,
+        dogBreed: fetchedDogInfo.dogBreed,
+        dogAge: fetchedDogInfo.dogAge,
+        country: fetchedDogInfo.country,
+        state: fetchedDogInfo.state,
+        city: fetchedDogInfo.city,
+        dogDescription: fetchedDogInfo.dogDescription,
+        dogPhotos: fetchedDogInfo.dogPhotos,
+        dogProfilePhoto: fetchedDogInfo.dogProfilePhoto,
+      });
+      //Updating component's data with the values obtained from the DB:
+      setDogName(fetchedDogInfo.dogName);
+      setSelectedBreed(fetchedDogInfo.dogBreed);
+      setDogAge(fetchedDogInfo.dogAge);
+      setSelectedCountry(fetchedDogInfo.country);
+      setSelectedState(fetchedDogInfo.state);
+      setSelectedCity(fetchedDogInfo.city);
+      setDogDescription(fetchedDogInfo.dogDescription);
+      setDogPhotos(fetchedDogInfo.dogPhotos);
+      setDogProfilePhoto(fetchedDogInfo.dogProfilePhoto);
+    } catch (error) {
+      console.log(error);
+      console.log("Error fetching dog information");
     }
-  }, [token, navigate]);
-
-  //GET ASSOCIATION NAME: (to each dog, it will be associated the name of the association that added that dog)
-  const email = currentUser.mail;
-  // const fetchAssociationName = async (email) => {
-  //   try {
-  //     const response = await axios
-  //       .get
-  //       // `${import.meta.env.VITE_REACT_APP_BASE_URL}/user`,
-  //       //{ withCredentials: true },
-  //       (); // Aim: user.email === email --> get: that associationName
-  //     const requestedAssociationName = await response.data;
-  //     console.log(
-  //       "Name of the association adding a dog - requested to the database",
-  //       requestedAssociationName
-  //     );
-  //     setAssociationName(requestedAssociationName);
-  //   } catch (error) {
-  //     console.log("Error fetching user information");
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchAssociationName(email);
-  // }, [email]);
+  };
 
   // fetch location data:
   const { countries, states, cities } = useLocationData(
@@ -87,15 +114,15 @@ const AddDog = () => {
 
   //Cancel input (clear all input fields)
   const handleCancelClick = () => {
-    setSelectedCountry("");
-    setSelectedState("");
-    setSelectedCity("");
-    setSelectedBreed("");
-    setDogName("");
-    setDogAge("");
-    setDogDescription("");
-    setDogPhotos([noPhoto, noPhoto, noPhoto, noPhoto, noPhoto]);
-    setDogProfilePhoto(noPhoto);
+    setSelectedCountry(dogInfo.country);
+    setSelectedState(dogInfo.state);
+    setSelectedCity(dogInfo.city);
+    setSelectedBreed(dogInfo.dogBreed);
+    setDogName(dogInfo.dogName);
+    setDogAge(dogInfo.dogAge);
+    setDogDescription(dogInfo.dogDescription);
+    setDogPhotos(dogInfo.dogPhotos);
+    setDogProfilePhoto(dogInfo.dogProfilePhoto);
     setError("");
     console.log("clearing all input fields");
   };
@@ -108,12 +135,12 @@ const AddDog = () => {
 
   // Function to upload photos (Firebase) and send the URL to the DB
   const uploadPhoto = async () => {
-    // TO DO
+    // TO DO (max. number of photos should be stablished.. maiby push the URL and stablish a max. length)
     console.log("define function to allow upload photos! - TO DO!");
   };
 
   // Send NEW DOG data to the data base:
-  const handleAddDog = async (e) => {
+  const handleEditDog = async (e) => {
     e.preventDefault();
     // Log the data being sent to the server
 
@@ -127,13 +154,12 @@ const AddDog = () => {
       dogDescription: dogDescription,
       dogPhotos: dogPhotos,
       dogProfilePhoto: dogProfilePhoto,
-      associationName: associationName,
     });
 
     // Send the updated information to the BE:
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/updatedogs/${dogId}`,
         {
           dogName: dogName,
           dogBreed: selectedBreed,
@@ -144,23 +170,11 @@ const AddDog = () => {
           dogDescription: dogDescription,
           dogPhotos: dogPhotos,
           dogProfilePhoto: dogProfilePhoto,
-          associationName: associationName,
         },
       );
       const dog = await response.data;
-      alert("Dog added");
-      setSelectedCountry("");
-      setSelectedState("");
-      setSelectedCity("");
-      setSelectedBreed("");
-      setDogName("");
-      setDogAge("");
-      setDogDescription("");
-      setDogPhotos([noPhoto, noPhoto, noPhoto, noPhoto, noPhoto]);
-      setDogProfilePhoto(noPhoto);
-      setError("");
-      console.log("clearing all input fields");
-      console.log("dog ddedd", dog);
+      alert("Dog edited");
+      console.log(dog);
     } catch (error) {
       setError(error.response.data);
       console.log(error);
@@ -168,10 +182,10 @@ const AddDog = () => {
   };
 
   return (
-    <form className="add-dog" onSubmit={handleAddDog}>
+    <form className="add-dog" onSubmit={handleEditDog}>
       <div className="dog-info-title flex items-center">
         <h1 className="text-darkest font-customFont ml-[12rem] flex w-2/3 flex-grow justify-start p-[2.38rem] text-[1.25rem] font-semibold">
-          ADD DOG FOR ADOPTION
+          EDIT DOG FOR ADOPTION
         </h1>
       </div>
 
@@ -222,6 +236,7 @@ const AddDog = () => {
                     className="user-data-input h-[2.4rem] w-[20rem] shrink-0"
                     value={dogName}
                     onChange={(e) => setDogName(e.target.value)}
+                    defaultValue={dogName}
                   />
                 </div>
               </div>
@@ -240,6 +255,7 @@ const AddDog = () => {
                   onChange={(e) => {
                     setDogAge(e.target.value);
                   }}
+                  defaultValue={dogAge}
                 >
                   <option key="lessThan6months">Less than 6 months</option>
                   <option key="6monthsTo2years">6 months to 2 years</option>
@@ -262,6 +278,7 @@ const AddDog = () => {
                   onChange={(e) => {
                     setSelectedBreed(e.target.value);
                   }}
+                  defaultValue={selectedBreed}
                 >
                   <option key="">Breed</option>
                   <option key="allBreed">All</option>
@@ -292,6 +309,7 @@ const AddDog = () => {
                     selectedCity={selectedCity}
                     setSelectedCity={setSelectedCity}
                   />
+                  {/* ADD selectedCountryIso2 and selectedStateIso2 to show previous results */}
                 </div>
               </div>
 
@@ -309,6 +327,7 @@ const AddDog = () => {
                   value={dogDescription}
                   onChange={(e) => setDogDescription(e.target.value)}
                   placeholder="(max. 200 characters)"
+                  defaultValue={dogDescription}
                 />
               </div>
             </div>
@@ -336,4 +355,4 @@ const AddDog = () => {
   );
 };
 
-export default AddDog;
+export default EditDog;

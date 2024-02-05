@@ -1,16 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
-import DogSearchParams from "./components/dog-adoption/DogSearchParams";
-import DogDetails from "./components/dog-adoption/DogDetails";
+import DogSearchParams from "./views/dog-adoption/DogSearchParams";
+import DogDetails from "./views/dog-adoption/DogDetails";
 import Footer from "./components/layout/Footer";
-import DogWalkingSearchParams from "./components/dog-walking/DogWalkingSearchParams";
+import DogWalkingSearchParams from "./views/dog-walking/DogWalkingSearchParams";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import UserProfile from "./components/auth/UserProfile";
-import Home from "./components/dog-adoption/Home";
-import AddDog from "./components/dog-adoption/AddDog";
-import EditDog from "./components/dog-adoption/EditDog";
-import ManageDogs from "./components/dog-adoption/ManageDogs";
+import Home from "./views/Home";
+import AddDog from "./views/dog-adoption/AddDog";
+import EditDog from "./views/dog-adoption/EditDog";
+import ManageDogs from "./views/dog-adoption/ManageDogs";
 
 const App = () => {
   return (

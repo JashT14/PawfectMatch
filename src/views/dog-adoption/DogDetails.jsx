@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useContext } from "react";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../../components/context/UserContext";
 import axios from "axios";
 import noPhoto from "../../assets/images/noPhoto.png";
 
@@ -14,6 +14,8 @@ const DogDetails = () => {
   const [dogAge, setDogAge] = useState("");
   const [dogDescription, setDogDescription] = useState("");
   const [associationName, setAssociationName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [dogPhotos, setDogPhotos] = useState([
     noPhoto,
     noPhoto,
@@ -21,16 +23,15 @@ const DogDetails = () => {
     noPhoto,
     noPhoto,
   ]);
-  const [dogProfilePhoto, setDogProfilePhoto] = useState(dogPhotos[0]); //implement feature to select profile photo
+  const [dogProfilePhoto, setDogProfilePhoto] = useState(dogPhotos[0]);
   const [error, setError] = useState("");
-
   // Context:
   const { currentUser } = useContext(UserContext);
-  let userType = currentUser?.usertype; //comes from the local storage
-  //let userType = "volunteer"; // for testing FE
+  let userType = currentUser?.usertype;
+  //let userType = "volunteer";
   const navigate = useNavigate();
   const { dogId } = useParams();
-  console.log("dogId", dogId);
+  console.log(dogId);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   //Initializing dogs info:
   const [dogInfo, setDogInfo] = useState({
@@ -45,14 +46,18 @@ const DogDetails = () => {
     dogProfilePhoto: "",
     associationName: "",
   });
-
-  // FETCH DOG'S INFO FROM THE DB BASED ON IT'S id:
+  //  ----------------- FETCH DOG'S INFO FROM THE DB BASED ON IT's id: -------------
   const getDogInfo = async (dogId) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`,
       );
       const fetchedDogInfo = await response.data;
+      const response2 = await axios.get(
+        "${import.meta.env.VITE_REACT_APP_BASE_URL}/userAssociation",
+      );
+      const fetchedDogInfo2 = response2.data;
+      console.log("dog initially fetched from the DB", fetchedDogInfo2);
       console.log("dog initially fetched from the DB", fetchedDogInfo);
       setDogInfo({
         dogName: fetchedDogInfo.dogName,
@@ -64,11 +69,13 @@ const DogDetails = () => {
         dogDescription: fetchedDogInfo.dogDescription,
         dogPhotos: fetchedDogInfo.dogPhotos,
         dogProfilePhoto: fetchedDogInfo.dogProfilePhoto,
-        associationName: fetchedDogInfo.associationName,
+        associationName: fetchedDogInfo2.associationName,
+        contactEmail: fetchedDogInfo2.contactEmail,
+        contactPhone: fetchedDogInfo2.contactPhone,
       });
       //Updating component's data with the values obtained from the DB:
       setDogName(fetchedDogInfo.dogName);
-      setSelectedBreed(fetchedDogInfo.dogName.dogBreed);
+      setSelectedBreed(fetchedDogInfo.dogBreed);
       setDogAge(fetchedDogInfo.dogAge);
       setSelectedCountry(fetchedDogInfo.country);
       setSelectedState(fetchedDogInfo.state);
@@ -76,12 +83,13 @@ const DogDetails = () => {
       setDogDescription(fetchedDogInfo.dogDescription);
       setDogPhotos(fetchedDogInfo.dogPhotos);
       setDogProfilePhoto(fetchedDogInfo.dogProfilePhoto);
-      setAssociationName(fetchedDogInfo.associationName);
+      setAssociationName(fetchedDogInfo2.associationName);
+      setContactEmail(fetchedDogInfo2.contactEmail);
+      setContactPhone(fetchedDogInfo2.contactPhone);
     } catch (error) {
       console.log("Error fetching dog information");
     }
   };
-
   const handlePhotoClick = (index) => {
     setSelectedPhotoIndex(index);
   };
@@ -94,9 +102,8 @@ const DogDetails = () => {
   };
 
   useEffect(() => {
-    getDogInfo();
+    getDogInfo(dogId);
   }, []);
-
   return (
     <div className="dog-details">
       <div className="dog-details-title flex items-center">
@@ -106,12 +113,10 @@ const DogDetails = () => {
         >
           BACK
         </button>
-
         <h1 className="text-darkest font-customFont flex w-2/3 flex-grow justify-center p-[2.38rem] text-[1.25rem] font-semibold">
           DOG DETAILS
         </h1>
       </div>
-
       <div className="container-dog mt-[1rem] flex flex-wrap items-start gap-[0rem]">
         <div className="container-dog-images ml-[8.125rem] flex-shrink-0 ">
           <img
@@ -131,7 +136,6 @@ const DogDetails = () => {
             ))}
           </div>
         </div>
-
         <div className="flex-grow">
           <div className="container-dog-info ml-[8.125rem]">
             <div className="text-darkest mt-10 text-[1.0rem] ">
@@ -152,12 +156,12 @@ const DogDetails = () => {
                 <strong>ASSOCIATION:</strong>&nbsp;&nbsp;&nbsp;
                 {associationName}
               </h2>
-              {/* <h2 className="mb-5">
+              <h2 className="mb-5">
                 <strong>PHONE:</strong>&nbsp;&nbsp;&nbsp;{contactPhone}
               </h2>
               <h2 className="mb-5">
                 <strong>EMAIL:</strong>&nbsp;&nbsp;&nbsp;{contactEmail}
-              </h2> */}
+              </h2>
               <h2 className="bg-darkest mt-10 h-[10.94rem] w-[35rem] rounded-lg p-2 text-justify text-white">
                 {dogDescription}
               </h2>
@@ -168,5 +172,4 @@ const DogDetails = () => {
     </div>
   );
 };
-
 export default DogDetails;

@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import ResultsDogsList from "./ResultsDogsList";
+import ResultsDogsList from "../../components/dog-adoption/ResultsDogsList";
 import axios from "axios";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../../components/context/UserContext";
 import noPhoto from "../../assets/images/noPhoto.png";
 //import DogCardEditRemove from "./DogCardEditRemove";
 
