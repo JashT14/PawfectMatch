@@ -12,7 +12,7 @@ const ResultsDogsAdoption = ({ filteredDogsArray }) => {
             dogBreed={dog.dogBreed}
             location={`${dog.country}, ${dog.state}, ${dog.city}`}
             dogPhotos={dog.dogPhotos}
-            dogId={dog.dogId}
+            dogId={dog._id}
             key={dog.dogId}
           />
         ))
