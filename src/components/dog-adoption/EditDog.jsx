@@ -10,8 +10,7 @@ import { UserContext } from "../context/UserContext";
 
 const EditDog = () => {
   const { dogId } = useParams(); //the value dogId from useParams is a string (need to transform into a number) (dogId comes from the path indicated in App.jsx)
-  const id = +dogId;
-  console.log("dogId", id);
+  console.log("dogId", dogId);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -39,15 +38,15 @@ const EditDog = () => {
   const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
   let userType = currentUser?.usertype;
 
-  useEffect(() => {
-    if (!token || userType !== "association") {
-      navigate("/");
-    }
-  }, [token, userType, navigate]);
+  // useEffect(() => {
+  //   if (!token || userType !== "association") {
+  //     navigate("/");
+  //   }
+  // }, [token, userType, navigate]);
 
   //Get dog info - run when the component mounts:
   useEffect(() => {
-    getDogInfo();
+    getDogInfo(dogId);
   }, []);
 
   //Initializing dogs info:
@@ -65,18 +64,17 @@ const EditDog = () => {
   });
 
   //GET INFO OF THAT DOG FROM THE DB, BASED ON THE dogId:
-  const getDogInfo = async (id) => {
+  const getDogInfo = async (dogId) => {
     try {
-      const response = await axios
-        .get
-        // `${import.meta.env.VITE_REACT_APP_BASE_URL}/dog`,
-        // { withCredentials: true },
-        (); // Aim: using dogId --> get: respective dogs info from the DB
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`,
+      );
+
       const fetchedDogInfo = await response.data;
       console.log("dog initially fetched from the DB", fetchedDogInfo);
       setDogInfo({
         dogName: fetchedDogInfo.dogName,
-        dogBreed: fetchedDogInfo.dogName.dogBreed,
+        dogBreed: fetchedDogInfo.dogBreed,
         dogAge: fetchedDogInfo.dogAge,
         country: fetchedDogInfo.country,
         state: fetchedDogInfo.state,
@@ -87,7 +85,7 @@ const EditDog = () => {
       });
       //Updating component's data with the values obtained from the DB:
       setDogName(fetchedDogInfo.dogName);
-      setSelectedBreed(fetchedDogInfo.dogName.dogBreed);
+      setSelectedBreed(fetchedDogInfo.dogBreed);
       setDogAge(fetchedDogInfo.dogAge);
       setSelectedCountry(fetchedDogInfo.country);
       setSelectedState(fetchedDogInfo.state);
@@ -96,6 +94,7 @@ const EditDog = () => {
       setDogPhotos(fetchedDogInfo.dogPhotos);
       setDogProfilePhoto(fetchedDogInfo.dogProfilePhoto);
     } catch (error) {
+      console.log(error);
       console.log("Error fetching dog information");
     }
   };
@@ -160,7 +159,7 @@ const EditDog = () => {
     // Send the updated information to the BE:
     try {
       const response = await axios.post(
-        // `${import.meta.env.VITE_REACT_APP_BASE_URL}/dog`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/updatedogs/${dogId}`,
         {
           dogName: dogName,
           dogBreed: selectedBreed,
@@ -170,10 +169,12 @@ const EditDog = () => {
           city: selectedCity,
           dogDescription: dogDescription,
           dogPhotos: dogPhotos,
+          dogProfilePhoto: dogProfilePhoto,
         },
       );
       const dog = await response.data;
       alert("Dog edited");
+      console.log(dog);
     } catch (error) {
       setError(error.response.data);
       console.log(error);

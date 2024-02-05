@@ -37,34 +37,40 @@ const AddDog = () => {
   const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
   let userType = currentUser?.usertype;
   useEffect(() => {
-    if (!token || userType !== "association") {
-      navigate("/");
+    if (userType !== "association") {
+      navigate("/home");
     }
   }, [token, userType, navigate]);
 
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
+
   //GET ASSOCIATION NAME: (to each dog, it will be associated the name of the association that added that dog)
   const email = currentUser.mail;
-  const fetchAssociationName = async (email) => {
-    try {
-      const response = await axios
-        .get
-        // `${import.meta.env.VITE_REACT_APP_BASE_URL}/dog`,
-        //{ withCredentials: true },
-        (); // Aim: user.email === email --> get: that associationName
-      const requestedAssociationName = await response.data;
-      console.log(
-        "Name of the association adding a dog - requested to the database",
-        requestedAssociationName,
-      );
-      setAssociationName(requestedAssociationName);
-    } catch (error) {
-      console.log("Error fetching user information");
-    }
-  };
+  // const fetchAssociationName = async (email) => {
+  //   try {
+  //     const response = await axios
+  //       .get
+  //       // `${import.meta.env.VITE_REACT_APP_BASE_URL}/user`,
+  //       //{ withCredentials: true },
+  //       (); // Aim: user.email === email --> get: that associationName
+  //     const requestedAssociationName = await response.data;
+  //     console.log(
+  //       "Name of the association adding a dog - requested to the database",
+  //       requestedAssociationName
+  //     );
+  //     setAssociationName(requestedAssociationName);
+  //   } catch (error) {
+  //     console.log("Error fetching user information");
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchAssociationName(email);
-  }, [email]);
+  // useEffect(() => {
+  //   fetchAssociationName(email);
+  // }, [email]);
 
   // fetch location data:
   const { countries, states, cities } = useLocationData(
@@ -127,7 +133,7 @@ const AddDog = () => {
     // Send the updated information to the BE:
     try {
       const response = await axios.post(
-        // `${import.meta.env.VITE_REACT_APP_BASE_URL}/dog`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs`,
         {
           dogName: dogName,
           dogBreed: selectedBreed,
@@ -137,11 +143,24 @@ const AddDog = () => {
           city: selectedCity,
           dogDescription: dogDescription,
           dogPhotos: dogPhotos,
+          dogProfilePhoto: dogProfilePhoto,
           associationName: associationName,
         },
       );
       const dog = await response.data;
       alert("Dog added");
+      setSelectedCountry("");
+      setSelectedState("");
+      setSelectedCity("");
+      setSelectedBreed("");
+      setDogName("");
+      setDogAge("");
+      setDogDescription("");
+      setDogPhotos([noPhoto, noPhoto, noPhoto, noPhoto, noPhoto]);
+      setDogProfilePhoto(noPhoto);
+      setError("");
+      console.log("clearing all input fields");
+      console.log("dog ddedd", dog);
     } catch (error) {
       setError(error.response.data);
       console.log(error);
