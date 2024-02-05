@@ -3,8 +3,20 @@ import { useNavigate } from "react-router-dom";
 import ResultsDogsList from "./ResultsDogsList";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
+import noPhoto from "../../assets/images/noPhoto.png";
+//import DogCardEditRemove from "./DogCardEditRemove";
 
 const ManageDogs = () => {
+  // const sampleDogs = [
+  //   {
+  //     dogName: "skdjsak",
+  //     dogBreed: "Golden Retriever",
+  //     location: "Portugal, Lisbon, Lisbon",
+  //     dogId: "1",
+  //     dogProfilePhoto: noPhoto,
+  //   },
+  // ];
+
   const [filteredDogsArray, setFilteredDogsArray] = useState([]);
 
   const navigate = useNavigate();
@@ -42,7 +54,7 @@ const ManageDogs = () => {
         LIST OF DOGS ADDED
       </h1>
       <button
-        className="custom-button-over-white-bg ml-[9rem] h-[3.0rem] w-[11.0rem]"
+        className="custom-button-over-white-bg2 ml-[6rem] h-[4.0rem] w-[60.0rem] cursor-pointer"
         type="button"
         onClick={() => navigate("/adddog")}
       >
@@ -50,6 +62,16 @@ const ManageDogs = () => {
       </button>
       <div className="flex flex-wrap">
         <div className="two-columns-right ml-[6.0rem] mr-[0rem] mt-[2rem] w-full pl-0 lg:w-1/2 lg:flex-grow">
+          {/* {sampleDogs.map((dog) => (
+            <DogCardEditRemove
+              key={dog.dogId}
+              dogName={dog.dogName}
+              dogBreed={dog.dogBreed}
+              location={dog.location}
+              dogId={dog.dogId}
+              dogProfilePhoto={dog.dogProfilePhoto}
+            />
+          ))} */}
           <ResultsDogsList filteredDogsArray={filteredDogsArray} />
         </div>
       </div>
