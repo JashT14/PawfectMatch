@@ -24,7 +24,7 @@ const DogCardEditRemove = ({
     try {
       // console.log(dogId);
       const response = await axios.delete(
-        `http://localhost:5000/api/v1/deletedogs/${dogId}`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/deletedogs/${dogId}`,
       );
       const removeDogState = response.data;
       navigate(0);
@@ -105,7 +105,6 @@ export default DogCardEditRemove;
 //     try {
 //       const response = await axios
 //         .delete
-//         //   "http://localhost:5000/api/v1/dog",
 //         // `${import.meta.env.VITE_REACT_APP_BASE_URL}/dog`,
 //         // { withCredentials: true },
 //         (); // Aim: remove dog with current dogId from the DB
