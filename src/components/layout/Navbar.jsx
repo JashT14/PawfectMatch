@@ -17,14 +17,20 @@ const Navbar = () => {
 
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const token = currentUser?.mail;
-  let userType = currentUser?.userType;
+  let userType = currentUser?.usertype;
 
   // checking if user is logged in:
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    console.log("isLoggedin", isLoggedIn);
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     axios.get(`${import.meta.env.VITE_REACT_APP_BASE_URL}/logout`, {
