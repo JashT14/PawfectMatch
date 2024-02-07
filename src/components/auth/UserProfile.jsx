@@ -321,7 +321,7 @@ const UserProfile = () => {
               ) : (
                 <div>
                   {/* if there is no location data in the database, it will be empty string: */}
-                  <h2>{userInfo.country ? selectedCountry : userInfo.cityy}</h2>
+                  <h2>{userInfo.country ? selectedCountry : userInfo.city}</h2>
                   <h2>{userInfo.state ? selectedState : userInfo.city}</h2>
                   <h2>{userInfo.city ? selectedCity : userInfo.city}</h2>
                 </div>

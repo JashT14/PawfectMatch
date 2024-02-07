@@ -10,21 +10,22 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  // ================  CHECK THIS CODE  =================
-
-  //let isLoggedIn = true; // for testing FE
-  //let userType = "regular"; //testing FE
-
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const token = currentUser?.mail;
-  let userType = currentUser?.userType;
+  let userType = currentUser?.usertype;
 
   // checking if user is logged in:
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    console.log("isLoggedin", isLoggedIn);
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     axios.get(`${import.meta.env.VITE_REACT_APP_BASE_URL}/logout`, {
@@ -34,8 +35,6 @@ const Navbar = () => {
     navigate("/login");
     console.log("User is logged out", currentUser);
   };
-
-  // =======================================================
 
   return (
     <div className="bg-darkest">

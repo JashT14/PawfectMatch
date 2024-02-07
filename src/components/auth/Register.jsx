@@ -3,44 +3,57 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [userType, setUserType] = useState("association");
-  const navigate = useNavigate();
-
-  // ================  CHECK THIS CODE =================
+  const [userData, setuserdata] = useState({
+    // name: "",
+    email: "",
+    password: "",
+    password2: "",
+    userType: "",
+  });
   const [error, setError] = useState("");
-
-  const handleRegister = async (e) => {
+  const navigate = useNavigate();
+  const changeInputHandler = (e) => {
+    e.preventDefault();
+    // setuserdata((prevState) => {
+    //   return { ...prevState, [e.target.name]: e.target.value };
+    // });
+    //console.log("Form submitted with values:", userData);
+    const { name, value } = e.target;
+    if (name === "userType") {
+      setuserdata((prevUserData) => ({
+        ...prevUserData,
+        userType: value,
+      }));
+      console.log("Form submitted with values:", userData);
+    } else {
+      setuserdata((prevUserData) => ({
+        ...prevUserData,
+        [name]: value,
+      }));
+      console.log("Form submitted with values:", userData);
+    }
+  };
+  const registerUser = async (e) => {
     e.preventDefault();
     setError("");
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_APP_BASE_URL}/register`,
-        { email, password, password2, userType },
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/signup`,
+        userData,
       );
       const newUser = await response.data;
       console.log(newUser);
-      if (!newUser) {
-        setError("Couldn't register user. Please try again.");
-      }
+      if (!newUser) setError("cant register user at this time ,pls try again");
       navigate("/login");
     } catch (err) {
-      setError(err.response.data.message);
+      setError(err.response.data);
+      console.log(err);
     }
   };
-
-  // ========================================================
-
   return (
-    <div className="login-container flex flex-col items-center justify-center pt-[3rem] ">
-      <form onSubmit={handleRegister}>
-        {error && (
-          <p className="bg-darkGrey mb-[1rem] flex justify-center rounded-[20px] p-[0.5rem] text-white shadow-md">
-            {error}
-          </p>
-        )}
+    <div className="login-container  flex flex-col items-center justify-center pt-[4rem] ">
+      {error && <p className="form__error-message">{error} </p>}
+      <form onSubmit={registerUser}>
         <h1 className="text-darkest mb-[3rem] text-center font-bold">
           {" "}
           REGISTER AS:{" "}
@@ -52,7 +65,7 @@ const Register = () => {
               value="regular"
               name="userType"
               className="radio-button mr-[1rem]"
-              onChange={() => setUserType("regular")}
+              onChange={changeInputHandler}
             />
             Regular User
           </label>
@@ -62,7 +75,7 @@ const Register = () => {
               value="volunteer"
               name="userType"
               className="radio-button mr-[1rem]"
-              onChange={() => setUserType("volunteer")}
+              onChange={changeInputHandler}
             />
             Volunteer
           </label>
@@ -72,7 +85,7 @@ const Register = () => {
               value="association"
               name="userType"
               className="radio-button mr-[1rem]"
-              onChange={() => setUserType("association")}
+              onChange={changeInputHandler}
             />
             Association
           </label>
@@ -84,13 +97,13 @@ const Register = () => {
               EMAIL:
             </label>
             <input
-              type="email"
-              id="email"
+              type="text"
+              // id="email"
+              name="email"
               className="user-data-input w-[22.31rem]"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={userData.email}
+              onChange={changeInputHandler}
             />
-
             <label
               htmlFor="password"
               className="text-darkest pb-[1rem] pt-[1rem]"
@@ -101,15 +114,17 @@ const Register = () => {
               <input
                 type="password"
                 className="user-data-input w-[22.31rem]"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password should have at least 6 characters"
+                value={userData.password}
+                name="password"
+                onChange={changeInputHandler}
+                placeholder="Password"
               />
               <input
                 type="password"
                 className="user-data-input w-[22.31rem]"
-                value={password2}
-                onChange={(e) => setPassword2(e.target.value)}
+                name="password2"
+                value={userData.password2}
+                onChange={changeInputHandler}
                 placeholder="Confirm password"
               />
             </div>
@@ -136,5 +151,4 @@ const Register = () => {
     </div>
   );
 };
-
 export default Register;
