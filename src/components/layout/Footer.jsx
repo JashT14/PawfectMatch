@@ -1,4 +1,3 @@
-// import { Link } from "react-router-dom";
 import twitter from "../../assets/images/twitter.png";
 import facebook from "../../assets/images/facebook.png";
 import linkedin from "../../assets/images/linkedin.png";
@@ -9,9 +8,6 @@ const Footer = () => {
     <div id="footer" name="Feedback" className="bg-darkest p-4 text-white">
       <div className="mx-auto flex  h-full max-w-screen-lg flex-col justify-center">
         <div>
-          {/*  <h4 className="text-4xl font-bold pt-10 sm:pt-8 inline border-b-1 border-gray-500">
-            Feedback
-          </h4> */}
           <p className="pt-3">We appreciate your feedback </p>
         </div>
         <div className="flex items-center justify-center">
@@ -58,25 +54,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
-// import { NavLink } from "react-router-dom";
-
-// const Footer = () => {
-//   return (
-//     <div className="bg-darkest">
-//       <footer className="mx-auto flex h-[4.0rem] w-[97%] items-center justify-center shadow-inner">
-//         <ul className="font-customFont flex gap-6 text-[1.0rem] font-semibold text-white md:flex-row md:items-center md:gap-[7vw] ">
-//           <li>
-//             <NavLink to="/faq">FAQ</NavLink>{" "}
-//           </li>
-//           <li>COPYRIGHT</li>
-//           <li>
-//             <NavLink to="/feedback">FEEDBACK</NavLink>{" "}
-//           </li>
-//         </ul>
-//       </footer>
-//     </div>
-//   );
-// };
-
-// export default Footer;

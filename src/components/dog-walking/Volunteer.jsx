@@ -1,14 +1,23 @@
 import noPhoto from "../../assets/images/noPhoto.png";
 
-const Volunteer = ({ photo, name, location, contactPhone, contactEmail }) => {
+const Volunteer = ({
+  photo,
+  id,
+  name,
+  location,
+  contactPhone,
+  contactEmail,
+}) => {
   let mainVolunteerPhoto = noPhoto;
-  if (photo.length) {
+
+  if (photo) {
     mainVolunteerPhoto = photo;
   }
+
   return (
     <div className="card-results-dogs flex h-[9rem] w-[48.0rem] items-center">
-      <div className="float-left ml-[1rem] mr-[1.5rem] h-[6rem] w-[6rem] object-cover">
-        <img src={mainVolunteerPhoto} alt={name} className="rounded-full" />
+      <div className="float-left ml-[1rem] mr-[1.5rem] mt-[1rem] h-[7rem] w-[5.251rem] object-cover">
+        <img src={mainVolunteerPhoto} alt={name} />
       </div>
       <div className="dogs-info">
         <h2 className="text-[1.00rem] text-white">

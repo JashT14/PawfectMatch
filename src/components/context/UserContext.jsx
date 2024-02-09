@@ -9,7 +9,7 @@ const UserProvider = ({ children }) => {
   );
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(currentUser));
-  }, [currentUser]); //when the currentUser changes, update the currentUser in the local storage
+  }, [currentUser]);
 
   return (
     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
@@ -18,5 +18,3 @@ const UserProvider = ({ children }) => {
   );
 };
 export default UserProvider;
-
-// currentUser has -->  email, userId, userType

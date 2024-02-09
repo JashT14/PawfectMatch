@@ -10,7 +10,7 @@ const ResultsAssociations = ({ filteredAssociationsArray }) => {
           <Association
             associationName={association.associationName}
             location={`${association.country}, ${association.state}, ${association.city}`}
-            //photo={association.photo}
+            photo={association.profilePicture}
             id={association._id}
             key={association._id}
             contactPhone={association.contactPhone}

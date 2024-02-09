@@ -16,45 +16,58 @@ const DogSearchParams = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [breeds, setBreeds] = useState([]);
   const [selectedBreed, setSelectedBreed] = useState("");
-  const [filteredDogsArray, setFilteredDogsArray] = useState([]); //Array that contains dogs that are compatible with user input
+  const [filteredDogsArray, setFilteredDogsArray] = useState([]); 
 
   const { countries, states, cities } = useLocationData(
     selectedCountryIso2,
-    selectedStateIso2,
+    selectedStateIso2
   );
-  // fetch breeds (DOG-CEO-API) when the component mounts and update its state with fetched breeds:
+
   useEffect(() => {
     fetchBreedList().then((breeds) => {
       setBreeds(breeds);
     });
   }, []);
+
+  useEffect(() => {
+    const getAlldogs = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldog`,
+          {
+            withCredentials: true,
+          }
+        );
+        const locationdata = response.data;
+        console.log(locationdata);
+        setFilteredDogsArray(locationdata);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAlldogs();
+  }, []);
+
   const requestFiltered = async (e) => {
     e.preventDefault();
-    // Check if selectedCountry is missing or empty
     if (selectedBreed === "All") {
-      // console.error("Selected country is missing or empty");
       return sendDataToServer(
-        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs`
       );
     }
     if (selectedBreed && !selectedCountry) {
-      // console.error("Selected country is missing or empty");
       return sendDataToServer(
-        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs/${selectedBreed}`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs/${selectedBreed}`
       );
     } else {
-      // Check if selectedState is "All" or missing
       if (!selectedState || (selectedState === "All" && selectedBreed)) {
-        // Only send country data
         try {
-          // Send data to the server (modify the endpoint accordingly)
-          //await sendDataToServer({ country: selectedCountry });
           sendDataToServer(
             `${
               import.meta.env.VITE_REACT_APP_BASE_URL
             }/mydogs?country=${encodeURIComponent(
-              selectedCountry,
-            )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+              selectedCountry
+            )}&dogBreed=${encodeURIComponent(selectedBreed)}`
           );
 
           console.log("Country data sent successfully");
@@ -62,36 +75,32 @@ const DogSearchParams = () => {
           console.error("Error sending country data:", error.message);
         }
       } else {
-        // Check if selectedCity is "All" or missing
         if (!selectedCity || selectedCity === "All") {
-          // Send country and state data
           try {
             sendDataToServer(
               `${
                 import.meta.env.VITE_REACT_APP_BASE_URL
               }/mydogs?country=${selectedCountry}&state=${encodeURIComponent(
-                selectedState,
-              )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+                selectedState
+              )}&dogBreed=${encodeURIComponent(selectedBreed)}`
             );
             console.log("Country and state data sent successfully");
           } catch (error) {
             console.error(
               "Error sending country and state data:",
-              error.message,
+              error.message
             );
           }
         } else {
-          // Send all data
           try {
-            // Send data to the server (modify the endpoint accordingly)
             await sendDataToServer(
               `${
                 import.meta.env.VITE_REACT_APP_BASE_URL
               }/mydogs?country=${selectedCountry}&state=${encodeURIComponent(
-                selectedState,
+                selectedState
               )}&city=${encodeURIComponent(
-                selectedCity,
-              )}&dogBreed=${encodeURIComponent(selectedBreed)}`,
+                selectedCity
+              )}&dogBreed=${encodeURIComponent(selectedBreed)}`
             );
             console.log("All data sent successfully");
           } catch (error) {
@@ -115,18 +124,6 @@ const DogSearchParams = () => {
       console.log(error);
     }
   };
-  // const fetchAllDogs = async () => {
-  //   try {
-  //     const response = await axios.get("${import.meta.env.VITE_REACT_APP_BASE_URL}/alldogs", {
-  //       withCredentials: true,
-  //     });
-  //     const locationdata = response.data;
-  //     setFilteredDogsArray(locationdata);
-  //     console.log("All dogs data fetched successfully");
-  //   } catch (error) {
-  //     console.error("Error fetching all dogs data:", error.message);
-  //   }
-  // };
 
   return (
     <div className="">
@@ -137,11 +134,6 @@ const DogSearchParams = () => {
         <div className="two-columns-left w-full basis-[38rem] pr-0 lg:w-[1/2]">
           <form
             onSubmit={requestFiltered}
-            // onSubmit={(e) => {
-            //   e.preventDefault();
-            //   console.log("submit");
-            //   requestFilteredDogs();
-            // }}
             className="custom-darkest-card ml-[6.0rem] h-[32rem] w-[32.50rem] "
           >
             <div className="location-info mt-[2.0rem] flex justify-start space-x-[1.0rem]">

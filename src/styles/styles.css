@@ -51,7 +51,6 @@
 .radio-button  {
     @apply bg-medium border-medium text-darkGrey focus:border-darkGrey focus:ring focus:ring-white focus:ring-opacity-50;
 }
-/* change font size */
 
 .custom-button-over-lightest-bg {
     @apply text-lightest bg-medium hover:bg-darkest mt-[2rem] mb-[2rem] rounded-[20px] text-[1.125rem] font-semibold hover:text-white;

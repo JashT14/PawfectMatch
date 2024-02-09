@@ -2,28 +2,29 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
+
 const Login = () => {
   const [userData, setuserdata] = useState({
-    // name: "",
     email: "",
     password: "",
-    // password2: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setCurrentUser } = useContext(UserContext);
+
   const changeInputHandler = (e) => {
     setuserdata((prevState) => {
       return { ...prevState, [e.target.name]: e.target.value };
     });
   };
+
   const registerUser = async (e) => {
     e.preventDefault();
     setError("");
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_REACT_APP_BASE_URL}/login`,
-        userData,
+        userData
       );
       const user = await response.data;
       setCurrentUser(user);
@@ -36,6 +37,7 @@ const Login = () => {
       console.log(err);
     }
   };
+
   return (
     <div className="login-container flex flex-col items-center justify-center pt-[14.00rem]">
       {error && <p className="form__error-message">{error} </p>}
@@ -82,4 +84,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;

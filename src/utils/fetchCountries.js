@@ -5,7 +5,7 @@ async function fetchCountries() {
     cKey: import.meta.env.VITE_COUNTRY_STATE_CITY_API_KEY,
   };
 
-  const headers = new Headers(); //initialize an empty set of headers
+  const headers = new Headers();
   headers.append("X-CSCAPI-KEY", config.cKey);
 
   const requestOptions = {
@@ -16,7 +16,6 @@ async function fetchCountries() {
   try {
     const response = await fetch(config.cUrl, requestOptions);
     countriesList = await response.json();
-    //console.log("countriesList", countriesList);
     return countriesList;
   } catch (error) {
     console.log("error fetching countries", error);

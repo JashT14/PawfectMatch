@@ -8,13 +8,12 @@ import axios from "axios";
 const Navbar = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const token = currentUser?.mail;
   let userType = currentUser?.usertype;
 
-  // checking if user is logged in:
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true);
@@ -39,14 +38,14 @@ const Navbar = () => {
   return (
     <div className="bg-darkest">
       <nav className="mx-auto flex w-[97%] items-center justify-between shadow-inner">
-        <div>
-          <img className="w-[4.5rem] " src={projectLogo} alt="project-logo" />
+        <div className="">
+          <img className=" w-[14rem]" src={projectLogo} alt="project-logo" />
         </div>
 
         <div
           className={`nav-links bg-darkest absolute left-0 ${
             isMenuOpen ? "top-[4.3rem]" : "top-[-100%]"
-          } item z-10 flex min-h-[14rem] w-full items-center px-5 md:static md:min-h-[4.5rem] md:w-auto`}
+          } item z-10 flex min-h-[14rem] w-full items-center px-7 md:static md:min-h-[4.5rem] md:w-auto`}
         >
           {isLoggedIn && userType === "association" ? (
             <div>
@@ -82,7 +81,7 @@ const Navbar = () => {
         <div className="font-customFont flex w-[15.0rem] justify-end text-[1.0rem] font-semibold text-white lg:w-auto">
           {isLoggedIn ? (
             <div className="">
-              <ul className="flex items-center gap-4">
+              <ul className="mb-3 mt-3 flex items-center gap-4">
                 <li>
                   <NavLink to="/profile">My profile</NavLink>
                 </li>

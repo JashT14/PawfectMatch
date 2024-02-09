@@ -4,7 +4,6 @@ import axios from "axios";
 
 const Register = () => {
   const [userData, setuserdata] = useState({
-    // name: "",
     email: "",
     password: "",
     password2: "",
@@ -14,11 +13,8 @@ const Register = () => {
   const navigate = useNavigate();
   const changeInputHandler = (e) => {
     e.preventDefault();
-    // setuserdata((prevState) => {
-    //   return { ...prevState, [e.target.name]: e.target.value };
-    // });
-    //console.log("Form submitted with values:", userData);
     const { name, value } = e.target;
+
     if (name === "userType") {
       setuserdata((prevUserData) => ({
         ...prevUserData,
@@ -33,6 +29,7 @@ const Register = () => {
       console.log("Form submitted with values:", userData);
     }
   };
+
   const registerUser = async (e) => {
     e.preventDefault();
     setError("");
@@ -98,12 +95,12 @@ const Register = () => {
             </label>
             <input
               type="text"
-              // id="email"
               name="email"
               className="user-data-input w-[22.31rem]"
               value={userData.email}
               onChange={changeInputHandler}
             />
+
             <label
               htmlFor="password"
               className="text-darkest pb-[1rem] pt-[1rem]"
@@ -151,4 +148,5 @@ const Register = () => {
     </div>
   );
 };
+
 export default Register;

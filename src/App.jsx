@@ -12,7 +12,6 @@ import AddDog from "./views/dog-adoption/AddDog";
 import EditDog from "./views/dog-adoption/EditDog";
 import ManageDogs from "./views/dog-adoption/ManageDogs";
 import axios from "axios";
-
 axios.defaults.withCredentials = true;
 
 const App = () => {

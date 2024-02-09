@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useLocationData } from "../../utils/locationData";
 import Location from "../../components/dog-adoption/Location";
 import ResultsAssociations from "../../components/dog-walking/ResultsAssociations";
-import ResultsVolunteers from "../../components/dog-walking/ResultsVolunteers";
+import ResultsVolunteers from "../..//components/dog-walking/ResultsVolunteers";
 import dogWalking from "../../assets/images/dogWalking.jpg";
 import axios from "axios";
 import { UserContext } from "../../components/context/UserContext";
@@ -14,10 +14,8 @@ const DogWalkingSearchParams = () => {
   const [selectedStateIso2, setSelectedStateIso2] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  //let userType = "association";
   const { currentUser } = useContext(UserContext);
-  //const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
-  let userType = currentUser?.usertype; //comes from the local storage
+  let userType = currentUser?.usertype;
 
   const [filteredAssociationsArray, setFilteredAssociationsArray] = useState(
     [],
@@ -29,19 +27,17 @@ const DogWalkingSearchParams = () => {
     selectedCountryIso2,
     selectedStateIso2,
   );
+  let mail = currentUser?.mail;
 
-  // VOLUNTEER REQUESTING FOR ASSOCIATION --- //
+  // VOLUNTEER REQUESTING FOR ASSOCIATION
   const requestFilteredAssociations = async (e) => {
     e.preventDefault();
-    // Check if selectedCountry is missing or empty
     if (!selectedCountry) {
       console.error("Selected country is missing or empty");
       return;
     }
 
-    // Check if selectedState is "All" or missing
     if (!selectedState || selectedState === "All") {
-      // Only send country data
       try {
         sendDataToServer(
           `${
@@ -54,9 +50,7 @@ const DogWalkingSearchParams = () => {
         console.error("Error sending country data:", error.message);
       }
     } else {
-      // Check if selectedCity is "All" or missing
       if (!selectedCity || selectedCity === "All") {
-        // Send country and state data
         try {
           sendDataToServer(
             `${
@@ -70,7 +64,6 @@ const DogWalkingSearchParams = () => {
           console.error("Error sending country and state data:", error.message);
         }
       } else {
-        // Send all data
         try {
           await sendDataToServer(
             `${
@@ -91,27 +84,23 @@ const DogWalkingSearchParams = () => {
       const response = await axios.get(apiurl, {
         withCredentials: true,
       });
-      const locationdata = response.data;
+      const locationdata = response.data.volunteer;
       console.log(locationdata);
-
-      setFilteredAssociationsArray(locationdata);
+      setFilteredVolunteersArray(locationdata);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // ASSOCIATIONS REQUESTING FOR VOLUNTEER --- //
+  // ASSOCIATIONS REQUESTING FOR VOLUNTEER
   const requestFilteredVolunteers = async (e) => {
     e.preventDefault();
-    // Check if selectedCountry is missing or empty
     if (!selectedCountry) {
       console.error("Selected country is missing or empty");
       return;
     }
 
-    // Check if selectedState is "All" or missing
     if (!selectedState || selectedState === "All") {
-      // Only send country data
       try {
         sendDataToServer2(
           `${
@@ -124,9 +113,7 @@ const DogWalkingSearchParams = () => {
         console.error("Error sending country data:", error.message);
       }
     } else {
-      // Check if selectedCity is "All" or missing
       if (!selectedCity || selectedCity === "All") {
-        // Send country and state data
         try {
           sendDataToServer2(
             `${
@@ -140,7 +127,6 @@ const DogWalkingSearchParams = () => {
           console.error("Error sending country and state data:", error.message);
         }
       } else {
-        // Send all data
         try {
           await sendDataToServer2(
             `${
@@ -161,10 +147,9 @@ const DogWalkingSearchParams = () => {
       const response = await axios.get(apiurl, {
         withCredentials: true,
       });
-      const locationdata = response.data;
+      const locationdata = response.data.associations;
       console.log(locationdata);
-
-      setFilteredVolunteersArray(locationdata);
+      setFilteredAssociationsArray(locationdata);
     } catch (error) {
       console.log(error);
     }
@@ -211,6 +196,7 @@ const DogWalkingSearchParams = () => {
                 </div>
               </form>
             </div>
+            <div></div>
 
             <div className="two-columns-right ml-[6.0rem] mr-[0rem] mt-[2rem] w-full pl-0 lg:w-1/2 lg:flex-grow">
               <ResultsVolunteers
@@ -236,8 +222,8 @@ const DogWalkingSearchParams = () => {
             Dogs don’t only need food and a roof over their heads to thrive, but
             also affection and lots of outdoor and playtime! <br />
             <br />
-            Here you can find associations that are looking for volunteers to
-            walk their dogs.
+            Register to see the list of Associations that are looking for
+            volunteers to walk their dogs.
           </h2>
 
           <h1 className="text-darkest font-customFont mt-[4rem] flex justify-center text-[1.25rem] font-semibold">
@@ -279,11 +265,17 @@ const DogWalkingSearchParams = () => {
                   </div>
                 </form>
               </div>
-
               <div className="dog-walking-search-right-col two-columns-right ml-[3.5rem]  mt-[3rem] flex w-full items-start justify-start lg:w-1/2 lg:flex-grow">
-                <ResultsAssociations
-                  filteredAssociationsArray={filteredAssociationsArray}
-                />
+                {!mail ? (
+                  <h2>
+                    Register or Login to see the list of associations that need
+                    help with dog walking
+                  </h2>
+                ) : (
+                  <ResultsAssociations
+                    filteredAssociationsArray={filteredAssociationsArray}
+                  />
+                )}
               </div>
             </div>
           </div>

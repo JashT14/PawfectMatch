@@ -7,10 +7,17 @@ import transformToReadableString from "../../utils/transformToReadableString";
 import { useLocationData } from "../../utils/locationData";
 import noPhoto from "../../assets/images/noPhoto.png";
 import { UserContext } from "../../components/context/UserContext";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import app from "../../components/auth/firebase";
 
 const EditDog = () => {
-  const { dogId } = useParams(); //the value dogId from useParams is a string (need to transform into a number) (dogId comes from the path indicated in App.jsx)
-  console.log("dogId", dogId);
+  const { dogId } = useParams(); 
+  console.log(dogId);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCountryIso2, setSelectedCountryIso2] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -21,28 +28,16 @@ const EditDog = () => {
   const [dogName, setDogName] = useState("");
   const [dogAge, setDogAge] = useState("");
   const [dogDescription, setDogDescription] = useState("");
-  const [dogPhotos, setDogPhotos] = useState([
-    noPhoto,
-    noPhoto,
-    noPhoto,
-    noPhoto,
-    noPhoto,
-  ]);
-  const [dogProfilePhoto, setDogProfilePhoto] = useState(dogPhotos[0]); //implement feature to select profile photo
+  const [dogProfilePhoto, setDogProfilePhoto] = useState(noPhoto); 
+  const [photoPer, setPhotoPer] = useState(0);
+  const [file, setFile] = useState(null);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
-  // Ensure that user not logged in cannot access this page:
   const { currentUser } = useContext(UserContext);
-  const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
+  const token = currentUser?.mail; 
   let userType = currentUser?.usertype;
-
-  useEffect(() => {
-    if (!token || userType !== "association") {
-      navigate("/");
-    }
-  }, [token, userType, navigate]);
 
   //Get dog info - run when the component mounts:
   useEffect(() => {
@@ -58,16 +53,16 @@ const EditDog = () => {
     state: "",
     city: "",
     dogDescription: "",
-    dogPhotos: [],
     dogProfilePhoto: "",
     associationName: "",
   });
 
   //GET INFO OF THAT DOG FROM THE DB, BASED ON THE dogId:
   const getDogInfo = async (dogId) => {
+
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`,
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/dogs/${dogId}`
       );
 
       const fetchedDogInfo = await response.data;
@@ -80,10 +75,8 @@ const EditDog = () => {
         state: fetchedDogInfo.state,
         city: fetchedDogInfo.city,
         dogDescription: fetchedDogInfo.dogDescription,
-        dogPhotos: fetchedDogInfo.dogPhotos,
         dogProfilePhoto: fetchedDogInfo.dogProfilePhoto,
       });
-      //Updating component's data with the values obtained from the DB:
       setDogName(fetchedDogInfo.dogName);
       setSelectedBreed(fetchedDogInfo.dogBreed);
       setDogAge(fetchedDogInfo.dogAge);
@@ -91,7 +84,6 @@ const EditDog = () => {
       setSelectedState(fetchedDogInfo.state);
       setSelectedCity(fetchedDogInfo.city);
       setDogDescription(fetchedDogInfo.dogDescription);
-      setDogPhotos(fetchedDogInfo.dogPhotos);
       setDogProfilePhoto(fetchedDogInfo.dogProfilePhoto);
     } catch (error) {
       console.log(error);
@@ -102,7 +94,7 @@ const EditDog = () => {
   // fetch location data:
   const { countries, states, cities } = useLocationData(
     selectedCountryIso2,
-    selectedStateIso2,
+    selectedStateIso2
   );
 
   // fetch breeds (DOG-CEO-API) when the component mounts and update its state with fetched breeds:
@@ -121,28 +113,14 @@ const EditDog = () => {
     setDogName(dogInfo.dogName);
     setDogAge(dogInfo.dogAge);
     setDogDescription(dogInfo.dogDescription);
-    setDogPhotos(dogInfo.dogPhotos);
     setDogProfilePhoto(dogInfo.dogProfilePhoto);
     setError("");
     console.log("clearing all input fields");
   };
 
-  // Change dog profile photo:
-  const handleChangeDogProfilePhoto = (index) => {
-    setDogProfilePhoto(dogPhotos[index]);
-    console.log("Profile photo changed");
-  };
 
-  // Function to upload photos (Firebase) and send the URL to the DB
-  const uploadPhoto = async () => {
-    // TO DO (max. number of photos should be stablished.. maiby push the URL and stablish a max. length)
-    console.log("define function to allow upload photos! - TO DO!");
-  };
-
-  // Send NEW DOG data to the data base:
   const handleEditDog = async (e) => {
     e.preventDefault();
-    // Log the data being sent to the server
 
     console.log("Data that is going to be sent to the DB:", {
       dogName: dogName,
@@ -152,7 +130,6 @@ const EditDog = () => {
       state: selectedState,
       city: selectedCity,
       dogDescription: dogDescription,
-      dogPhotos: dogPhotos,
       dogProfilePhoto: dogProfilePhoto,
     });
 
@@ -168,9 +145,8 @@ const EditDog = () => {
           state: selectedState,
           city: selectedCity,
           dogDescription: dogDescription,
-          dogPhotos: dogPhotos,
           dogProfilePhoto: dogProfilePhoto,
-        },
+        }
       );
       const dog = await response.data;
       alert("Dog edited");
@@ -180,45 +156,103 @@ const EditDog = () => {
       console.log(error);
     }
   };
+  const handlePhotoChange = (e) => {
+    const selectedPhoto = e.target.files[0];
+    setFile(selectedPhoto);
+    console.log("selected photo", selectedPhoto);
+  };
+  useEffect(() => {
+    file && uploadFile(file, "photoUrl");
+    console.log("file", file);
+  }, [file]);
+  const uploadFile = (file) => {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + file.name;
+    const storageRef = ref(storage, "images/" + fileName);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    console.log("Upload task created:", uploadTask);
+    console.log("filename:", fileName);
+    // Listen for state changes, errors, and completion of the upload.
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setPhotoPer(Math.round(progress));
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        console.error("Error during upload:", error);
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            break;
+          case "storage/canceled":
+            // User canceled the upload
+            break;
+          // ...
+          case "storage/unknown":
+            // Unknown error occurred, inspect error.serverResponse
+            break;
+        }
+      },
+      () => {
+        // Upload completed successfully, now we can get the download URL
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          setDogProfilePhoto(downloadURL);
+        });
+      }
+    );
+  };
+
 
   return (
     <form className="add-dog" onSubmit={handleEditDog}>
       <div className="dog-info-title flex items-center">
-        <h1 className="text-darkest font-customFont ml-[12rem] flex w-2/3 flex-grow justify-start p-[2.38rem] text-[1.25rem] font-semibold">
+        <h1 className="text-darkest font-customFont ml-[6rem] flex w-2/3 flex-grow justify-start p-[2.38rem] text-[1.25rem] font-semibold">
           EDIT DOG FOR ADOPTION
         </h1>
       </div>
-
       <div className="container-dog mt-[1rem] flex flex-wrap items-start gap-[0rem]">
         <div className="container-dog-images ml-[8.125rem] flex-shrink-0 ">
           <img
-            className="h-[29.38rem] w-[29.38rem] object-cover"
-            src={dogProfilePhoto}
-            alt={`Profile photo of ${dogName}`}
+            key={dogProfilePhoto}
+            className="h-[25rem] w-[18.75rem] object-cover"
+            src={dogProfilePhoto || noPhoto}
+            alt="dog_photo"
           />
-          <div className="mt-[1rem] flex cursor-pointer flex-wrap gap-4 space-x-[0.1rem]">
-            {dogPhotos.map((photo, index) => (
-              <img
-                key={index}
-                className="h-[5rem] w-[5rem] object-cover"
-                src={photo}
-                alt={`${dogName}-${index + 1}`}
-                onClick={() => handleChangeDogProfilePhoto(index)}
+          <h1 className="text-darkest mb-[1.5rem] ml-[2.0rem] mt-1 text-[0.9rem]">
+            (Recommended aspect/ratio: 4:3){" "}
+          </h1>
+          <div className="mt-8">
+            <label
+              htmlFor="img"
+              className="text-darkest mouse-pointer border-darkest  mb-[2rem] ml-[4.5rem] mt-[2rem] h-[2.5rem] w-[8.0rem] cursor-pointer rounded-[20px] border bg-white p-3 text-[0.875rem] font-bold"
+            >
+              CHANGE PHOTO
+              <input
+                type="file"
+                accept="image/dogs/*"
+                id="img"
+                style={{ display: "none" }}
+                onChange={(e) => handlePhotoChange(e)}
               />
-            ))}
+            </label>
+            {photoPer > 0 && "Uploading: " + photoPer + "%"}
           </div>
-          <button
-            className="custom-button-over-white-bg ml-[9rem] h-[3.0rem] w-[11.0rem]"
-            type="button"
-            onClick={() => uploadPhoto()}
-          >
-            UPLOAD PHOTO
-          </button>
-          <h2 className="text-darkest font-customFont flex justify-center p-[0rem] text-[1.00rem] ">
-            (Click to set as Profile Photo)
-          </h2>
         </div>
-
         <div className="flex-grow">
           <div className="container-dog-info ml-[8.125rem]">
             <div className="text-darkest mt-10 text-[1.0rem] ">
@@ -240,7 +274,6 @@ const EditDog = () => {
                   />
                 </div>
               </div>
-
               <div className="input-field mb-[1.0rem] flex items-center ">
                 <label
                   htmlFor="dogAge"
@@ -262,7 +295,6 @@ const EditDog = () => {
                   <option key="moreThan2years">More than 2 years</option>
                 </select>
               </div>
-
               <div className="breed-info mt-[0.0rem] flex justify-start space-x-[3.12rem] pt-0">
                 <label
                   htmlFor="breeds"
@@ -270,7 +302,6 @@ const EditDog = () => {
                 >
                   BREED:
                 </label>
-
                 <select
                   className="custom-select-option w-[20rem]"
                   id="breeds"
@@ -290,7 +321,6 @@ const EditDog = () => {
                   ))}
                 </select>
               </div>
-
               <div className="location-info mt-[0.0rem] flex justify-start space-x-[1.0rem]">
                 <h1 className="text-darkest mt-[0.50rem] shrink-0 p-0  pb-[0.5rem] pr-[0.8rem] text-[1.00rem] font-semibold tracking-wide">
                   LOCATION:
@@ -309,10 +339,8 @@ const EditDog = () => {
                     selectedCity={selectedCity}
                     setSelectedCity={setSelectedCity}
                   />
-                  {/* ADD selectedCountryIso2 and selectedStateIso2 to show previous results */}
                 </div>
               </div>
-
               <div className="input-description mb-[0.0rem] flex ">
                 <label
                   htmlFor="dogDescription"

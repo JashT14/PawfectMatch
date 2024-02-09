@@ -28,7 +28,16 @@ const DogDetails = () => {
   // Context:
   const { currentUser } = useContext(UserContext);
   let userType = currentUser?.usertype;
-  //let userType = "volunteer";
+  let mail = currentUser?.mail;
+
+  useEffect(() => {
+    if (!mail) {
+      navigate("/login");
+      alert("Login or Register To See  Dog Details");
+    }
+    console.log(mail);
+  }, [mail]);
+
   const navigate = useNavigate();
   const { dogId } = useParams();
   console.log(dogId);
@@ -46,7 +55,7 @@ const DogDetails = () => {
     dogProfilePhoto: "",
     associationName: "",
   });
-  //  ----------------- FETCH DOG'S INFO FROM THE DB BASED ON IT's id: -------------
+
   const getDogInfo = async (dogId) => {
     try {
       const response = await axios.get(
@@ -54,14 +63,14 @@ const DogDetails = () => {
       );
       const fetchedDogInfo = await response.data;
       const response2 = await axios.get(
-        "${import.meta.env.VITE_REACT_APP_BASE_URL}/userAssociation",
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/userAssociation/${dogId}`,
       );
       const fetchedDogInfo2 = response2.data;
       console.log("dog initially fetched from the DB", fetchedDogInfo2);
       console.log("dog initially fetched from the DB", fetchedDogInfo);
       setDogInfo({
         dogName: fetchedDogInfo.dogName,
-        dogBreed: fetchedDogInfo.dogName.dogBreed,
+        dogBreed: fetchedDogInfo.dogBreed,
         dogAge: fetchedDogInfo.dogAge,
         country: fetchedDogInfo.country,
         state: fetchedDogInfo.state,
@@ -87,6 +96,7 @@ const DogDetails = () => {
       setContactEmail(fetchedDogInfo2.contactEmail);
       setContactPhone(fetchedDogInfo2.contactPhone);
     } catch (error) {
+      console.log(error);
       console.log("Error fetching dog information");
     }
   };
@@ -104,6 +114,7 @@ const DogDetails = () => {
   useEffect(() => {
     getDogInfo(dogId);
   }, []);
+
   return (
     <div className="dog-details">
       <div className="dog-details-title flex items-center">
@@ -120,21 +131,10 @@ const DogDetails = () => {
       <div className="container-dog mt-[1rem] flex flex-wrap items-start gap-[0rem]">
         <div className="container-dog-images ml-[8.125rem] flex-shrink-0 ">
           <img
-            className="h-[29.38rem] w-[29.38rem] object-cover"
-            src={dogPhotos[selectedPhotoIndex]}
+            className="w-22.105rem] h-[29.4rem] object-cover"
+            src={dogProfilePhoto || dogPhotos[selectedPhotoIndex]}
             alt={dogName}
           />
-          <div className="mt-[1rem] flex cursor-pointer flex-wrap gap-4 space-x-[0.1rem]">
-            {dogPhotos.map((photo, index) => (
-              <img
-                key={index}
-                className="h-[5rem] w-[5rem] object-cover"
-                src={photo}
-                alt={`${dogName}-${index + 1}`}
-                onClick={() => handlePhotoClick(index)}
-              />
-            ))}
-          </div>
         </div>
         <div className="flex-grow">
           <div className="container-dog-info ml-[8.125rem]">

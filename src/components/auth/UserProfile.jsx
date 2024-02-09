@@ -4,6 +4,13 @@ import { useLocationData } from "../../utils/locationData";
 import noPhoto from "../../assets/images/noPhoto.png";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import app from "./firebase";
 import axios from "axios";
 
 const UserProfile = () => {
@@ -20,13 +27,16 @@ const UserProfile = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [photo, setPhoto] = useState(null);
+  const [photoDb, setPhotoDb] = useState(null);
+  const [photoPer, setPhotoPer] = useState(0);
+  const [file, setFile] = useState(null);
   const navigate = useNavigate();
 
   // Context:
   const { currentUser } = useContext(UserContext);
-  const token = currentUser?.mail; //is this the user email? if yes, can you change from mail to email?
-  let userType = currentUser?.usertype; //comes from the local storage
-  //let userType = "volunteer";
+  const token = currentUser?.mail;
+  let userType = currentUser?.usertype;
 
   console.log(
     "userType identified in token - CHECK if it is correct!",
@@ -53,13 +63,13 @@ const UserProfile = () => {
     if (!token) {
       navigate("/login");
     }
-  }, [token, navigate]);
+  }, [token]);
 
   useEffect(() => {
     getUserInfo();
-  }, [token]); //update userInfo and component's data every time the token (= currentUser.mail) changes
+  }, [token]);
 
-  // Fetching location data from public API:  (to be removed from here...) -----------
+  // Fetching location data from public API:
   const { countries, states, cities } = useLocationData(
     selectedCountryIso2,
     selectedStateIso2,
@@ -87,6 +97,7 @@ const UserProfile = () => {
         description: fetchedUserInfo.description,
         checkBox: fetchedUserInfo.checkBox,
         userType: fetchedUserInfo.userType,
+        photo: fetchedUserInfo.profilePicture,
       });
 
       // Updating component's data with the values obtained from the DB:
@@ -100,7 +111,9 @@ const UserProfile = () => {
       setContactPhone(fetchedUserInfo.contactPhone);
       setDescription(fetchedUserInfo.description);
       setIsChecked(fetchedUserInfo.checkBox);
+      setPhoto(fetchedUserInfo.profilePicture);
     } catch (error) {
+      console.log(error);
       console.log("Error fetching user information");
     }
   };
@@ -116,13 +129,13 @@ const UserProfile = () => {
     );
   }, [editMode]);
 
-  // In case the user doesn't want to save changes (ignore new added info and fetch data from the DB):
+  // In case the user doesn't want to save changes:
   const handleCancelClick = () => {
     setEditMode(false);
     getUserInfo();
   };
 
-  // Send new info added/edited by the user to the BE (using handleSubmit function):
+  // Send new info added/edited by the user to the BE :
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
@@ -140,6 +153,7 @@ const UserProfile = () => {
       description: description,
       checkBox: isChecked,
       userType,
+      photo: photo,
     });
 
     setError("");
@@ -160,9 +174,12 @@ const UserProfile = () => {
           description: description,
           checkBox: isChecked,
           userType,
+          photo: photo,
         },
       );
+
       const user = await response.data;
+      uploadPhoto(photoDb);
       alert("Changes made!");
     } catch (error) {
       setError(error.response.data);
@@ -178,22 +195,94 @@ const UserProfile = () => {
     );
   }, [isChecked]);
 
+  const handlePhotoChange = (e) => {
+    const selectedPhoto = e.target.files[0];
+    setFile(selectedPhoto);
+    console.log("selected photo", selectedPhoto);
+  };
+  useEffect(() => {
+    file && uploadFile(file, "photoUrl");
+    console.log("file", file);
+  }, [file]);
+  const uploadFile = (file) => {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + file.name;
+    const storageRef = ref(storage, "images/" + fileName);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    console.log("Upload task created:", uploadTask);
+    console.log("filename:", fileName);
+    // Listen for state changes, errors, and completion of the upload.
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setPhotoPer(Math.round(progress));
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        console.error("Error during upload:", error);
+        switch (error.code) {
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            break;
+          case "storage/canceled":
+            // User canceled the upload
+            break;
+          // ...
+          case "storage/unknown":
+            // Unknown error occurred, inspect error.serverResponse
+            break;
+        }
+      },
+      () => {
+        // Upload completed successfully, now we can get the download URL
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          setPhoto(downloadURL);
+          setPhotoDb({ profilePicture: downloadURL });
+        });
+      },
+    );
+  };
+
+  const uploadPhoto = async (photo) => {
+    console.log(photo);
+    try {
+      const response = axios.post(
+        `${import.meta.env.VITE_REACT_APP_BASE_URL}/editpicture`,
+        photo,
+        {
+          withCredentials: true,
+        },
+      );
+      const userPhoto = response.data;
+      console.log("database photo url ", userPhoto);
+    } catch (error) {
+      console.log("  error upload user photo", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("photo Url to be sent to the database ", photo);
+  });
+
   return (
     <div className="profile-container pt-[5rem]">
       <div className="title-and-button flex max-w-[66rem] flex-wrap justify-between">
         <h1 className="text-darkest mb-[4.0rem] flex justify-start pl-[3rem] text-[1.25rem] font-bold">
           USER PROFILE:
         </h1>
-        {userType === "association" && (
-          <button
-            className="bg-medium hover:bg-darkest mb-[2rem] h-[3.5rem] w-[20.0rem] rounded-[20px] text-[1.00rem] font-semibold text-white"
-            onClick={() => navigate("/newdog")}
-          >
-            ADD DOG
-          </button>
-        )}
       </div>
-
       <form onSubmit={handleSubmit}>
         <div className="container-two-columns grid grid-cols-1 gap-0 lg:w-[80rem] lg:grid-cols-2">
           <div className="left-column flex flex-col pl-[3rem] lg:col-span-1">
@@ -238,7 +327,6 @@ const UserProfile = () => {
                     defaultValue={nameFirst}
                   />
                 </div>
-
                 <div className="input-field mb-[1.0rem] flex items-center ">
                   <label
                     htmlFor="nameLast"
@@ -259,7 +347,6 @@ const UserProfile = () => {
                 </div>
               </div>
             )}
-
             <div className="input-field mb-[1.0rem] flex items-center ">
               <label
                 htmlFor="contactEmail"
@@ -278,7 +365,6 @@ const UserProfile = () => {
                 defaultValue={contactEmail}
               />
             </div>
-
             <div className="input-field mb-[0.0rem] flex items-center ">
               <label
                 htmlFor="contactPhone"
@@ -297,7 +383,6 @@ const UserProfile = () => {
                 defaultValue={contactPhone}
               />
             </div>
-
             <div className="location-info mt-[1.0rem] flex justify-start space-x-[1.0rem]">
               <h1 className="text-darkest mt-[0.50rem] shrink-0 p-0  pb-[0.5rem] pr-[0.8rem] text-[1.00rem] font-semibold tracking-wide">
                 LOCATION:
@@ -320,14 +405,12 @@ const UserProfile = () => {
                 </div>
               ) : (
                 <div>
-                  {/* if there is no location data in the database, it will be empty string: */}
                   <h2>{userInfo.country ? selectedCountry : userInfo.city}</h2>
                   <h2>{userInfo.state ? selectedState : userInfo.city}</h2>
                   <h2>{userInfo.city ? selectedCity : userInfo.city}</h2>
                 </div>
               )}
             </div>
-
             <div className="input-description mb-[0.0rem] flex ">
               <label
                 htmlFor="description"
@@ -346,14 +429,13 @@ const UserProfile = () => {
                 defaultValue={description}
               />
             </div>
-
             <div className="ml-[0rem] mt-[2rem] flex items-center justify-start">
               <input
                 type="checkbox"
                 id="questionCheckbox"
                 checked={isChecked}
                 onChange={() => {
-                  setIsChecked(!isChecked); //toggle between true or false
+                  setIsChecked(!isChecked);
                 }}
                 readOnly={!editMode}
               />
@@ -369,36 +451,61 @@ const UserProfile = () => {
               </label>
             </div>
           </div>
-          <div className="right-column pl-[3rem] pt-[3rem] lg:col-span-1 ">
+          <div className="right-column pl-[3rem] pt-[0rem] lg:col-span-1 ">
             {userType === "association" ? (
-              <div>
-                <h1 className="text-darkest mb-[1.5rem] ml-[6rem] text-[1.0rem] font-bold">
-                  {" "}
-                  ADD/CHANGE LOGO (optional){" "}
-                </h1>
-              </div>
+              <>
+                <div>
+                  <h1 className="text-darkest mb-[1.5rem] ml-[8rem] text-[1.0rem] font-bold">
+                    {" "}
+                    ADD/CHANGE LOGO{" "}
+                  </h1>
+                </div>
+                <div className=" ml-[3rem] mt-[2rem] flex flex-wrap justify-start ">
+                  <img
+                    key={photo}
+                    className="h-[20rem] w-[20rem] object-cover"
+                    src={photo || noPhoto}
+                    alt="user_photo"
+                  />
+                </div>
+              </>
             ) : (
-              <h1 className="text-darkest mb-[1.5rem] ml-[6rem] text-[1.0rem] font-bold ">
-                {" "}
-                ADD/CHANGE PHOTO (optional){" "}
-              </h1>
+              <>
+                <h1 className="text-darkest mb-[1.5rem] ml-[8rem] text-[1.0rem] font-bold ">
+                  {" "}
+                  ADD/CHANGE PHOTO{" "}
+                </h1>
+                <div className=" ml-[6rem] mt-[2rem] flex flex-wrap justify-start ">
+                  <img
+                    key={photo}
+                    className="h-[20rem] w-[15rem] object-cover"
+                    src={photo || noPhoto}
+                    alt="user_photo"
+                  />
+                </div>
+              </>
             )}
-            <div className=" ml-[3rem] mt-[2rem] flex flex-wrap justify-start ">
-              <img
-                //key={user.id} //TO DO!!!: CATCH user.id
-                className="h-[20rem] w-[20rem] object-cover"
-                src={noPhoto}
-                //alt={id} //TO DO!!!: CATCH user.id
-              />
-            </div>
+            <h1 className="text-darkest mb-[1.5rem] ml-[6.5rem] mt-1 text-[0.9rem]">
+              (Recommended aspect/ratio: 4:3){" "}
+            </h1>
             <div>
               {editMode && (
-                <button
-                  className="text-darkest mouse-pointer border-darkest  mb-[2rem] ml-[9.5rem] mt-[2rem] h-[2.5rem] w-[8.0rem] rounded-[20px] border bg-white text-[0.875rem] font-bold"
-                  //onClick={() => TO DO!!!
-                >
-                  CHANGE PHOTO
-                </button>
+                <div className="mt-8">
+                  <label
+                    htmlFor="img"
+                    className="text-darkest mouse-pointer border-darkest  mb-[2rem] ml-[9.5rem] mt-[2rem] h-[2.5rem] w-[8.0rem] cursor-pointer rounded-[20px] border bg-white p-3 text-[0.875rem] font-bold"
+                  >
+                    CHANGE PHOTO
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="img"
+                      style={{ display: "none" }}
+                      onChange={(e) => handlePhotoChange(e)}
+                    />
+                  </label>{" "}
+                  {photoPer > 0 && "Uploading: " + photoPer + "%"}
+                </div>
               )}
             </div>
           </div>

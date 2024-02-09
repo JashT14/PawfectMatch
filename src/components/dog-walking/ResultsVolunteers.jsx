@@ -10,7 +10,7 @@ const ResultsVolunteers = ({ filteredVolunteersArray }) => {
           <Volunteer
             name={`${volunteer.nameFirst} ${volunteer.nameLast}`}
             location={`${volunteer.country}, ${volunteer.state}, ${volunteer.city}`}
-            //photo={volunteer.photo}
+            photo={volunteer.profilePicture}
             id={volunteer._id}
             key={volunteer._id}
             contactPhone={volunteer.contactPhone}
