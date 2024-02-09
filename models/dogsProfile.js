@@ -14,7 +14,6 @@ const dogProfileSchema = new mongoose.Schema({
     },
     dogAge: {
         type: String,
-        allowNull: true,
 
     },
     country: {

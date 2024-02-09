@@ -1,4 +1,5 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -7,21 +8,15 @@ const session = require('express-session')
 const db = require('./config/db')
 const admin = require("firebase-admin");
 const firebase = require('./config/firebase')
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth')
 const authRouter = require('./routes/Auth')
 
-const serviceAccount = require('./pawfectmatch-serviceAccount.json');
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
 
 const app = express();
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 //app.use(cors({ credentials: true, origin: "http://127.0.0.1:3000" }));
 const corsOrigin = {
-    origin: ['http://localhost:5173'], //or whatever port your frontend is using
+    origin: process.env.FRONTEND_URL,  //'http://localhost:5173', //or whatever port your frontend is using
     credentials: true,
 }
 app.use(cors(corsOrigin));
@@ -38,7 +33,7 @@ app.use(cors(corsOrigin));
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
-    secret: 'keyboardcat',
+    secret: process.env.secret_key,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -51,6 +46,13 @@ app.use(session({
 
 // CREATE ANOTHER  ROUTES HERE 
 app.use('/api/v1/', authRouter)
+
+app.get('/', (req, res) => {
+    res.json({
+        message: " success",
+        data: "api staeted"
+    })
+})
 
 
 const PORT = 5000;

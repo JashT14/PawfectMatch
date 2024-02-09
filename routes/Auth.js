@@ -20,17 +20,19 @@ authRouter.post('/reset', auth.forgetpassword)
 
 authRouter.post('/dogs', requireAuth, dog.createDog)
 authRouter.get('/dogs', requireAuth, dog.AllMyDogs)
-authRouter.get('/alldogs', requireAuth, dog.Alldogs)
-authRouter.get('/dogs/:dogId', requireAuth, dog.getOnedogs)
+authRouter.get('/alldogs', dog.Alldogs)//===> requireAuth  ( check)
+authRouter.get('/alldog', dog.getAlldogs)
+
+authRouter.get('/dogs/:dogId', requireAuth, dog.getOnedogs)//===> requireAuth  ( check)
 // 
-authRouter.get('/alldogs/:breed', requireAuth, dog.GetDogsByBreed)
+authRouter.get('/alldogs/:breed', dog.GetDogsByBreed)
 
 //get dogs by search ,  query params( breed)
 
 authRouter.post('/updatedogs/:dogId', requireAuth, dog.updatedogs)
 authRouter.delete('/deletedogs/:dogId', requireAuth, dog.deletedogs)
 
-authRouter.get('/mydogs', requireAuth, dog.getAlldogsByCityOrCountry)
+authRouter.get('/mydogs', dog.getAlldogsByCityOrCountry)//===> requireAuth  ( check)
 /***
  * USER FUNCTIONALITY
  */
@@ -43,7 +45,7 @@ authRouter.get('/profile', requireAuth, user.viewprofile)
 authRouter.post('/profile', requireAuth, user.editprofile)
 authRouter.post('/editpicture', requireAuth, user.editprofilepicture)
 authRouter.get('/change', requireAuth, user.changeusertype)
-authRouter.get('/userAssociation/dogId', requireAuth, user.profileAssociation)
+authRouter.get('/userAssociation/:dogId', requireAuth, user.profileAssociation)
 
 authRouter.get('/test', user.token,)
 

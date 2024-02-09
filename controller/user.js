@@ -135,7 +135,7 @@ exports.editprofilepicture = async (req, res, next) => {
     //update profile
     const email = req.session.email
     const { profilePicture } = req.body;
-    //console.log(profilePicture)
+    // console.log(profilePicture)
 
     try {
         const userprofile = await UserProfile.findOne({ email: email })
@@ -185,7 +185,7 @@ exports.getAllvolunteerByCityOrCountry = async (req, res, next) => {
         //const tours = await query
         //console.log(queryObj)
 
-        const volunteer = await UserProfile.find({ userType: 'volunteer', ...queryObj }).select('nameFirst nameLast contactEmail contactPhone country state  city').exec();
+        const volunteer = await UserProfile.find({ userType: 'volunteer', ...queryObj }).select('nameFirst nameLast contactEmail contactPhone country state  city profilePicture').exec();
 
         return res.status(200).json({ status: "all volunteers", volunteer: volunteer })
 
@@ -227,7 +227,7 @@ exports.getAllAssocciationByCityOrCountry = async (req, res, next) => {
         //console.log(queryObj)
 
 
-        const association = await UserProfile.find({ userType: 'association', ...queryObj }).select('nameFirst nameLast contactEmail contactPhone country state  city').exec();
+        const association = await UserProfile.find({ userType: 'association', ...queryObj }).select('nameFirst nameLast contactEmail contactPhone country state  city  profilePicture').exec();
         return res.status(200).json({ status: "all associations", associations: association })
 
 

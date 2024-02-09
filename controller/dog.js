@@ -44,22 +44,53 @@ exports.createDog = async (req, res, next) => {
 
 
 
-
-
-
+//** REMOVE AUTH FOR UNREGISTERED USER
 exports.Alldogs = async (req, res, next) => {
     try {
-        const userProfile = req.session.user
-
-        if (userProfile) {
-            const showprofileWithDog = await DogProfile.find()
-            if (!showprofileWithDog) {
-                return res.json({ status: 'failed' })
-            }
-            return res.json(showprofileWithDog)
+        const showprofileWithDog = await DogProfile.find()
+        if (!showprofileWithDog) {
+            return res.json({ status: 'failed' })
         }
-        return res.json({ status: 'failed' })
+        return res.json(showprofileWithDog)
 
+
+    } catch (error) {
+        res.status(403).json({ status: 'Error  Occurred', message: error.message })
+    }
+
+}
+
+
+
+//** AUTH REQUIRED ASSOCIATION AND VOLUNTEER */
+// exports.Alldogs = async (req, res, next) => {
+//     try {
+//         const userProfile = req.session.user
+
+//         if (userProfile) {
+//             const showprofileWithDog = await DogProfile.find()
+//             if (!showprofileWithDog) {
+//                 return res.json({ status: 'failed' })
+//             }
+//             return res.json(showprofileWithDog)
+//         }
+//         return res.json({ status: 'failed' })
+
+//     } catch (error) {
+//         res.status(403).json({ status: 'Error  Occurred', message: error.message })
+//     }
+
+// }
+
+
+exports.getAlldogs = async (req, res, next) => {
+    try {
+
+        const showprofileWithDog = await DogProfile.find()
+        if (!showprofileWithDog) {
+            return res.json({ status: 'failed  searching for  all dogs' })
+        }
+        return res.json(showprofileWithDog)
     } catch (error) {
         res.status(403).json({ status: 'Error  Occurred', message: error.message })
     }
@@ -81,7 +112,7 @@ exports.getAlldogsByCityOrCountry = async (req, res, next) => {
         //const tours = await query
         console.log(queryObj)
 
-        const dogs = await DogProfile.find(queryObj).select('dogName dogBreed  country state city ')
+        const dogs = await DogProfile.find(queryObj).select('dogName dogBreed  country state city dogProfilePhoto')
         return res.status(200).json(dogs)
 
         // { status: "all dogs", dogs: dogs }
@@ -114,21 +145,41 @@ exports.AllMyDogs = async (req, res, next) => {
 
 }
 
+//  ***** AUTH REQUIRED***///
+// exports.GetDogsByBreed = async (req, res, next) => {
+//     const { breed } = req.params
+//     console.log(breed)
+//     try {
+//         const userProfile = req.session.user
+
+//         if (userProfile) {
+//             const dog = await DogProfile.find({ dogBreed: breed })
+//             if (!dog) {
+//                 return res.json({ status: ' dogs does  not exits in  db' })
+//             }
+//             return res.json(dog)
+//         }
+//         return res.json({ status: 'failed  user Auth' })
+
+//     } catch (error) {
+//         res.status(403).json({ status: 'Error  Occurred', message: error.message })
+//     }
+
+
+
+// }
 
 exports.GetDogsByBreed = async (req, res, next) => {
     const { breed } = req.params
-    console.log(breed)
+    // console.log(breed)
     try {
-        const userProfile = req.session.user
 
-        if (userProfile) {
-            const dog = await DogProfile.find({ dogBreed: breed })
-            if (!dog) {
-                return res.json({ status: ' dogs does  not exits in  db' })
-            }
-            return res.json(dog)
+        const dog = await DogProfile.find({ dogBreed: breed })
+        if (!dog) {
+            return res.json({ status: ' dogs does  not exits in  db' })
         }
-        return res.json({ status: 'failed  user Auth' })
+        return res.json(dog)
+
 
     } catch (error) {
         res.status(403).json({ status: 'Error  Occurred', message: error.message })
@@ -137,6 +188,9 @@ exports.GetDogsByBreed = async (req, res, next) => {
 
 
 }
+
+
+
 
 
 exports.getWalkingdogs = async (req, res, next) => {
